@@ -1,0 +1,28 @@
+{
+  "name": "cos-202-group-project",
+  "version": "1.0.0",
+  "description": "Group 4 Blog Platform (No name yet)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon backend/src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/the-secanto/COS-202-Group-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/the-secanto/COS-202-Group-Project/issues"
+  },
+  "homepage": "https://github.com/the-secanto/COS-202-Group-Project#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
