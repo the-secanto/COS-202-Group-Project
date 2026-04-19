@@ -1,24 +1,24 @@
 # **COS-202-Group-Project**
 Group 4 Blog Platform (No name yet)
 
-## **Description**
+## 📌Description
 
 This is a full stack blog platform where users can create, read, update and delete posts. The platform also allows users to explore trending topics and discover insightful ideas.
 
 It features a backend build with Node.js and Express, and a frontend developed using React and TypeScript, providing a responsive and interactive user experience.
 
-## **Features**
+## 🤝Features
 - Create, read, update and delete operations for posts.
 - User authentication (Login and Sign up).
 - Interacts with posts via comments and likes.
 - Explore trending topics and discover new content.
 
-## **Tech Stack**
+## 🗄️Tech Stack
 - Backend: Node.js, Express, TypeScript
 - Frontend: React, TypeScript, Axios
 - Database: (MongoDB, PostgreSQL, etc.) [Choose later]
 
-## **Setup**
+## 🛠️Setup
 ### Backend
 1. Navigate to the `backend` folder:
    cd backend
