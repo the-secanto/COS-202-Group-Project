@@ -38,3 +38,4 @@ It feachures a backend build with Node.js and Express, and a frontend developed 
 
 3. Run the frontend:
     npm start
+**PTN: Ensure the Backend is ran before the Frontend**
