@@ -8,9 +8,10 @@ This is a full stack blog platform where users can create, read, update and dele
 It feachures a backend build with Node.js and Express, and a frontend developed using React and TypeScript, providing a responsive and interactive user experience.
 
 ## **Features**
-- CRUD operations for posts
-- User authentication
-- Post interaction via comments and likes
+- Create, read, update and delete operations for posts.
+- User authentication (Login and Sign up).
+- Interacts with posts via comments and likes.
+- Explore trending topics and discover new content.
 
 ## **Tech Stack**
 - Backend: Node.js, Express, TypeScript
