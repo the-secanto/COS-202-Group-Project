@@ -1,8 +1,7 @@
 # **COS-202-Group-Project**
 Group 4 Blog Platform (No name yet)
 
-## **Description**
-This is a blog platform where users can create, read, update, and delete posts. It includes both a backend (Node.js with Express) and a frontend (React with TypeScript).
+
 
 ## **Features**
 - CRUD operations for posts
