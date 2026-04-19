@@ -5,7 +5,7 @@ Group 4 Blog Platform (No name yet)
 
 This is a full stack blog platform where users can create, read, update and delete posts. The platform also allows users to explore trending topics and discover insightful ideas.
 
-It feachures a backend build with Node.js and Express, and a frontend developed using React and TypeScript, providing a responsive and interactive user experience.
+It features a backend build with Node.js and Express, and a frontend developed using React and TypeScript, providing a responsive and interactive user experience.
 
 ## **Features**
 - Create, read, update and delete operations for posts.
@@ -38,4 +38,4 @@ It feachures a backend build with Node.js and Express, and a frontend developed 
 
 3. Run the frontend:
     npm start
-**PTN: Ensure the Backend is ran before the Frontend**
+**NOTE: Ensure the Backend is run before the Frontend**
