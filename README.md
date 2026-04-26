@@ -61,5 +61,15 @@ It features a backend build with Node.js and Express, and a frontend developed u
 3. ReadME file
 4. Database
 
+## Screenshots of User Interface
+1.## 📸 Screenshots
 
+### 📊 Dashboard
+![Homepage](./UI_Screenshots/profile.png)
+
+### 🏠 Homepage
+![Login](./UI_Screenshots/body.png)
+
+### 🔐 Login Page
+![Login](./UI_Screenshots/login.png)
 
