@@ -55,5 +55,11 @@ It features a backend build with Node.js and Express, and a frontend developed u
    2. Edit or delete their own posts.
    3. Change personal details.
 
+## Project Structure
+1. Backend
+2. Frontend
+3. ReadME file
+4. Database
+
 
 
