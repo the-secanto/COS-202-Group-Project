@@ -44,7 +44,16 @@ It features a backend build with Node.js and Express, and a frontend developed u
 1. Open the website in your browser at ...tbd.
 2. For new users, click on Sign Up.
 3. If user already has an account, Login using your credentials.
-4. Once done in the login page, user will be redirected to the home page.
+4. Once done in the login page, user will be redirected to the display page.
+   Here users can:
+   1. Explore trending posts
+   2. Like and comment on the posts.
+   3. Search for posts of their choice.
+5. Users can also go to the home page.
+   Here users can:
+   1. Create a new blog post.
+   2. Edit or delete their own posts.
+   3. Change personal details.
 
 
 
