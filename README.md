@@ -39,3 +39,12 @@ It features a backend build with Node.js and Express, and a frontend developed u
 3. Run the frontend:
     npm start
 **NOTE: Ensure the Backend is run before the Frontend**
+
+## Usage
+1. Open the website in your browser at ...tbd.
+2. For new users, click on Sign Up.
+3. If user already has an account, Login using your credentials.
+4. Once done in the login page, user will be redirected to the home page.
+
+
+
