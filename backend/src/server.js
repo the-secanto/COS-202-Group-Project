@@ -2,6 +2,10 @@ import express from 'express';
 import postsRoutes from './routes/posts_routes.js'
 import { config } from 'dotenv'
 import { connectDB, disconnectDB } from './config/db.js'
+import authRoutes from './routes/authRoutes.js'
+
+
+app.use(express.json())
 
 
 const app = express()
