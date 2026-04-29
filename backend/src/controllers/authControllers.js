@@ -55,4 +55,14 @@ const login = async (req, res) => {
 
 }
 
-export { register, login }
+
+const logout = async (req, res) => {
+    res.clearCookie("jwt", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+    })
+    res.json({ message: "Logout successful" })
+}
+
+export { register, login, logout }
