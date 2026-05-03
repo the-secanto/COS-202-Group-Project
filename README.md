@@ -1,5 +1,8 @@
 # **COS-202-Group-Project**
-Group 4 Blog Platform (No name yet)
+
+ 
+# The Muse
+## Group 4 Blog Platform
 
 ## 📌Description
 
@@ -16,7 +19,7 @@ It features a backend build with Node.js and Express, and a frontend developed u
 ## 🗄️Tech Stack
 - Backend: Node.js, Express, TypeScript
 - Frontend: React, TypeScript, Axios
-- Database: (MongoDB, PostgreSQL, etc.) [Choose later]
+- Database: MongoDB, PostgreSQL, 
 
 ## 🛠️Setup
 ### Backend
