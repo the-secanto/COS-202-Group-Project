@@ -1,20 +1,13 @@
-import express from 'express';
+import express from 'express'
+import { Posts } from '../controllers/postsControllers.js'
+import { register, login, logout } from '../controllers/authControllers.js'
 
 const router = express.Router()
 
-router.get('/', (req, res) => {
-    res.json({ httpMethod: 'get' })
-})
-router.post('/', (req, res) => {
-    res.json({ httpMethod: 'post' })
-})
-router.put('/', (req, res) => {
-    res.json({ httpMethod: 'put' })
-})
-router.delete('/', (req, res) => {
-    res.json({ httpMethod: 'delete' })
-})
+router.post('/', Posts)
 
+router.post('/login', login)
 
+router.post('/logout', logout)
 
 export default router

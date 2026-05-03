@@ -3,6 +3,7 @@ import postsRoutes from './routes/posts_routes.js'
 import { config } from 'dotenv'
 import { connectDB, disconnectDB } from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
+import posts_routes from './routes/posts_routes.js'
 
 
 app.use(express.json())
@@ -13,7 +14,8 @@ const app = express()
 config()
 connectDB()
 
-app.use('/feed', postsRoutes)
+app.use('/posts', posts_routes)
+app.use('/auth', authRoutes)
 
 const PORT = 8080
 const server = app.listen(PORT, () => {
