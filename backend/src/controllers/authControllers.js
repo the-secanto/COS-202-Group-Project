@@ -28,7 +28,12 @@ const register = async (req, res) => {
     })
 
     const token = generateTokens(user.id)
-    res.status(201).json({ message: "User registered successfully", user, token })
+    res.status(201).json({
+        status: "success",
+        message: "User registered successfully",
+        user,
+        token
+    })
 
 }
 
@@ -51,7 +56,12 @@ const login = async (req, res) => {
     }
 
     const token = generateTokens(user.id)
-    res.json({ message: "Login successful", user, token })
+    res.json({
+        status: "success",
+        message: "Login successful",
+        user,
+        token
+    })
 
 }
 
@@ -62,7 +72,10 @@ const logout = async (req, res) => {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict'
     })
-    res.json({ message: "Logout successful" })
+    res.json({
+        status: "success",
+        message: "Logout successful"
+    })
 }
 
 export { register, login, logout }
