@@ -8,18 +8,18 @@
 
 This is a full stack blog platform where users can create, read, update and delete posts. The platform also allows users to explore trending topics and discover insightful ideas.
 
-It features a backend build with Node.js and Express, and a frontend developed using React and TypeScript, providing a responsive and interactive user experience.
+It features a backend built with Node.js and Express, and a frontend developed using React and TypeScript, providing a responsive and interactive user experience.
 
 ## 🤝Features
 - Create, read, update and delete operations for posts.
 - User authentication (Login and Sign up).
-- Interacts with posts via comments and likes.
+- Users can interact with posts via comments and likes.
 - Explore trending topics and discover new content.
 
 ## 🗄️Tech Stack
 - Backend: Node.js, Express, TypeScript
 - Frontend: React, TypeScript, Axios
-- Database: MongoDB, PostgreSQL, 
+- Database: PostgreSQL 
 
 ## 🛠️Setup
 ### Backend
@@ -61,7 +61,7 @@ It features a backend build with Node.js and Express, and a frontend developed u
 ## Project Structure
 1. Backend
 2. Frontend
-3. ReadME file
+3. README file
 4. Database
 
 ## 📸 Screenshots of User Interface
@@ -80,5 +80,9 @@ It features a backend build with Node.js and Express, and a frontend developed u
 3. Integration - Oloyede Ifeoluwa
 4. Documentation - Yusuf -Awari Maryam and Usen Emmanuel
 5. Team Lead - Sipeolu Emmanuel 
+
+## 🌐 Live Demo
+Link: Coming soon...
+
 
 
