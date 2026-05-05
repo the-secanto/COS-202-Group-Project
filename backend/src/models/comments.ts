@@ -3,6 +3,7 @@ export interface Comment {
   postId: number;
   author: string;
   content: string;
+  parentId: number | null;
   createdAt: Date;
 }
 
