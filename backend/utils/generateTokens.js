@@ -12,3 +12,4 @@ const generateTokens = (userId, res) => {
     })
     return token
 }
+export default generateTokens
