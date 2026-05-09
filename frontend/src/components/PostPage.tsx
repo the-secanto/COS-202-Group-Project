@@ -3,20 +3,20 @@ import { Navbar } from './Navbar.tsx';
 
 export function PostPage() {
   return (
-    <div className="min-h-screen bg-[#f5f5f7] py-8 text-[#1f1f1f]">
-      <main className="mx-auto w-[92%] max-w-5xl rounded-md bg-white p-6 shadow-sm md:p-10">
+    <div className="min-h-screen bg-[#f5f5f7] py-8 text-[#1f1f1f] md:py-10">
+      <main className="mx-auto w-[92%] max-w-5xl rounded-md bg-white px-6 py-6 shadow-sm md:px-10 md:py-8">
         <Navbar />
 
-        <article className="mx-auto max-w-3xl">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-400">
+        <article className="mx-auto max-w-2xl">
+          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400">
             Technology · 6 min read
           </p>
 
-          <h1 className="text-2xl font-semibold leading-snug text-gray-900 md:text-3xl">
+          <h1 className="text-2xl font-semibold leading-tight text-gray-900 md:text-[2rem]">
             The Quiet Revolution of Minimal Computing
           </h1>
 
-          <div className="mt-5 flex items-center gap-3">
+          <div className="mt-6 flex items-center gap-3">
             <img
               src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
               alt="Author avatar"
@@ -28,18 +28,18 @@ export function PostPage() {
             </div>
           </div>
 
-          <figure className="mt-8">
+          <figure className="mt-8 border-t border-gray-100 pt-6">
             <img
               src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80"
               alt="Minimal desk setup"
-              className="h-[320px] w-full rounded-sm object-cover"
+              className="h-[300px] w-full rounded-sm object-cover md:h-[330px]"
             />
             <figcaption className="mt-2 text-center text-xs text-gray-400">
               The beauty of a focused environment.
             </figcaption>
           </figure>
 
-          <div className="mt-8 space-y-5 text-[15px] leading-8 text-gray-700">
+          <div className="mt-8 space-y-5 text-[14px] leading-8 text-gray-700 md:text-[15px]">
             <p>
               It was on a rain-soaked afternoon I first powered this machine. No notifications, no
               startup banners, no digital noise. Just one cursor, one text field, and the sound of
@@ -60,16 +60,16 @@ export function PostPage() {
           </div>
 
           <div className="mt-10 border-y border-gray-100 py-4">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
               <button
                 type="button"
-                className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900"
+                className="rounded-md border border-gray-200 px-3.5 py-2 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 md:text-sm"
               >
                 Likes (408)
               </button>
               <button
                 type="button"
-                className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900"
+                className="rounded-md border border-gray-200 px-3.5 py-2 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 md:text-sm"
               >
                 Share
               </button>
@@ -77,7 +77,7 @@ export function PostPage() {
           </div>
 
           <section className="mt-10">
-            <div className="mb-4 flex items-center justify-between gap-4">
+            <div className="mb-5 flex items-center justify-between gap-4">
               <h2 className="text-lg font-semibold text-gray-900">Readers Comments (48)</h2>
               <button
                 type="button"
@@ -87,8 +87,8 @@ export function PostPage() {
               </button>
             </div>
 
-            <div className="space-y-4">
-              <article className="rounded-md border border-gray-100 bg-white p-4">
+            <div className="space-y-4 border-t border-gray-100 pt-6">
+              <article className="rounded-md border border-gray-100 bg-[#fcfcfd] p-4">
                 <div className="flex items-start gap-3">
                   <img
                     src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80"
@@ -101,7 +101,7 @@ export function PostPage() {
                       <span className="text-xs text-gray-400">2 hours ago</span>
                     </div>
                     <p className="mt-2 text-sm leading-6 text-gray-600">
-                      This perspective helped me rethink my entire setup. Fewer tools really does
+                      This perspective helped me rethink my entire setup. Fewer tools really do
                       reduce friction and improve the quality of focused work.
                     </p>
                     <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
@@ -116,7 +116,7 @@ export function PostPage() {
                 </div>
               </article>
 
-              <article className="rounded-md border border-gray-100 bg-white p-4">
+              <article className="rounded-md border border-gray-100 bg-[#fcfcfd] p-4">
                 <div className="flex items-start gap-3">
                   <img
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
@@ -144,7 +144,7 @@ export function PostPage() {
                 </div>
               </article>
 
-              <article className="rounded-md border border-gray-100 bg-white p-4">
+              <article className="rounded-md border border-gray-100 bg-[#fcfcfd] p-4">
                 <div className="flex items-start gap-3">
                   <img
                     src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=120&q=80"
@@ -171,6 +171,29 @@ export function PostPage() {
                   </div>
                 </div>
               </article>
+            </div>
+          </section>
+
+          <section className="mt-10 rounded-md border border-gray-100 bg-[#fafafa] p-4 md:p-5">
+            <div className="flex items-start gap-3">
+              <img
+                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
+                alt="Author avatar"
+                className="h-10 w-10 rounded-md object-cover"
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Marcus Thorne</p>
+                <p className="mt-1 text-xs leading-5 text-gray-500">
+                  Author of design-philosophy essays and practical notes on digital focus. His
+                  writing explores how minimal tools shape better thinking.
+                </p>
+                <button
+                  type="button"
+                  className="mt-3 text-xs font-semibold text-indigo-600 transition hover:text-indigo-500"
+                >
+                  View all publications
+                </button>
+              </div>
             </div>
           </section>
         </article>
