@@ -65,7 +65,7 @@ export function PostPage() {
                 type="button"
                 className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900"
               >
-                Like (408)
+                Likes (408)
               </button>
               <button
                 type="button"
@@ -87,8 +87,90 @@ export function PostPage() {
               </button>
             </div>
 
-            <div className="rounded-md border border-dashed border-gray-200 p-5 text-sm text-gray-500">
-              Comments section intentionally left for your next commit.
+            <div className="space-y-4">
+              <article className="rounded-md border border-gray-100 bg-white p-4">
+                <div className="flex items-start gap-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80"
+                    alt="Commenter avatar"
+                    className="h-9 w-9 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="text-sm font-semibold text-gray-900">Emma J.</p>
+                      <span className="text-xs text-gray-400">2 hours ago</span>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
+                      This perspective helped me rethink my entire setup. Fewer tools really does
+                      reduce friction and improve the quality of focused work.
+                    </p>
+                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                      <button type="button" className="transition hover:text-gray-800">
+                        Like
+                      </button>
+                      <button type="button" className="transition hover:text-gray-800">
+                        Reply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article className="rounded-md border border-gray-100 bg-white p-4">
+                <div className="flex items-start gap-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
+                    alt="Commenter avatar"
+                    className="h-9 w-9 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="text-sm font-semibold text-gray-900">Julien V.</p>
+                      <span className="text-xs text-gray-400">6 hours ago</span>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
+                      I started a no-notification workday after reading this. The difference in
+                      concentration is huge, especially for long-form writing sessions.
+                    </p>
+                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                      <button type="button" className="transition hover:text-gray-800">
+                        Like
+                      </button>
+                      <button type="button" className="transition hover:text-gray-800">
+                        Reply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article className="rounded-md border border-gray-100 bg-white p-4">
+                <div className="flex items-start gap-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=120&q=80"
+                    alt="Commenter avatar"
+                    className="h-9 w-9 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="text-sm font-semibold text-gray-900">Noah K.</p>
+                      <span className="text-xs text-gray-400">1 day ago</span>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
+                      Great read. Minimal computing feels less like a trend and more like a
+                      practical design philosophy for modern creators.
+                    </p>
+                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                      <button type="button" className="transition hover:text-gray-800">
+                        Like
+                      </button>
+                      <button type="button" className="transition hover:text-gray-800">
+                        Reply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
             </div>
           </section>
         </article>
