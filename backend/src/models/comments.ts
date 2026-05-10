@@ -8,4 +8,9 @@ export interface Comment {
 }
 
 export let comments: Comment[] = [];
-export let commentIdCounter = 1;
+
+export const likes: Record<number, Set<string>> = {};
+
+const counter = { id: 1 };
+export const getNextCommentId = () => counter.id++;
+export const commentIdCounter = counter;

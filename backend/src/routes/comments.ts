@@ -2,25 +2,26 @@ import express from "express";
 import {
   createComment,
   getComments,
-  deleteComment
+  deleteComment,
+  likeComment,
+  unlikeComment
 } from "../controllers/commentsController";
 
 const router = express.Router();
 
+// Create comment
 router.post("/", createComment);
+
+// Get comments for a post
 router.get("/:postId", getComments);
+
+// Delete comment
 router.delete("/:commentId", deleteComment);
 
+// Like comment
+router.post("/:commentId/like", likeComment);
+
+// Unlike comment
+router.post("/:commentId/unlike", unlikeComment);
+
 export default router;
-
-export interface Comment {
-  id: number;
-  postId: number;
-  author: string;
-  content: string;
-  parentId?: number | null;
-  createdAt: Date;
-}
-
-export let comments: Comment[] = [];
-export let commentIdCounter = 1;

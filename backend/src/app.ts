@@ -1,13 +1,14 @@
-import express from "express";
+import express, { Request, Response } from "express";
+import commentsRoutes from "./routes/comments";
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("API is running...");
+app.use("/comments", commentsRoutes);
+
+app.get("/", (req: Request, res: Response) => {
+  res.send("API running...");
 });
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
-});
+export default app;
