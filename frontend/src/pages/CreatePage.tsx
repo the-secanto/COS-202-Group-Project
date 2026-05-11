@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Navbar } from '../components/Navbar';
 
 export function CreatePage() {
   const [visibility, setVisibility] = useState<'Public' | 'Private'>('Public');
@@ -21,44 +22,10 @@ export function CreatePage() {
   return (
     <div className="min-h-screen bg-[#f5f5f7] py-4 text-[#1f1f1f]">
       <main className="mx-auto w-[96%] max-w-[1200px] rounded-md bg-white shadow-sm">
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="text-[32px] font-semibold leading-none tracking-wide text-[#151515]">
-              MUSK
-            </Link>
-            <nav className="hidden items-center gap-5 text-sm text-gray-500 md:flex">
-              <Link to="/" className="hover:text-gray-700">
-                Home
-              </Link>
-              <button type="button" className="hover:text-gray-700">
-                Latest
-              </button>
-              <button type="button" className="hover:text-gray-700">
-                Archive
-              </button>
-            </nav>
-          </div>
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4"> 
+      <Navbar/>
+      </header>
 
-          <div className="flex items-center gap-2.5">
-            <button type="button" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
-              <span>◉</span>
-              Preview
-            </button>
-            <Link
-              to="/create"
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
-            >
-              Write
-            </Link>
-            <Link
-              to="/profile"
-              aria-label="Profile"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600"
-            >
-              U
-            </Link>
-          </div>
-        </header>
 
         <section className="grid min-h-[680px] grid-cols-1 md:grid-cols-[1fr_290px]">
           <div className="border-b border-gray-100 p-6 md:border-b-0 md:border-r md:border-gray-100 md:p-8">
@@ -209,3 +176,4 @@ export function CreatePage() {
     </div>
   );
 }
+
