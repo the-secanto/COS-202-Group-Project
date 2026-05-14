@@ -1,0 +1,7 @@
+#!/bin/sh
+# Removes Cursor IDE co-author trailer if it was injected into the message.
+msg_file="$1"
+test -f "$msg_file" || exit 0
+tmp="${msg_file}.tmp.$$"
+grep -v 'cursoragent@cursor.com' "$msg_file" > "$tmp" && mv "$tmp" "$msg_file" || rm -f "$tmp"
+exit 0

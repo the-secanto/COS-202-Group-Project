@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar.tsx';
+import { articles } from '../data/articles.ts';
+import type { BlogArticle } from '../data/articles.ts';
 
 const topics = [
   {
@@ -41,16 +44,102 @@ const topics = [
   },
 ];
 
-export function ProfilePage() {
+const publishedFeed: { article: BlogArticle; date: string }[] = articles.slice(0, 4).map((article, i) => ({
+  article,
+  date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][i] ?? 'Jan 1, 2026',
+}));
+
+type ProfileTab = 'published' | 'highlights' | 'drafts';
+
+function ProfileStoryRow({ article, date }: { article: BlogArticle; date: string }) {
   return (
-    <div className="min-h-screen bg-white text-[#1a1a1a]">
+    <article className="flex flex-col gap-5 border-b border-gray-100 py-8 last:border-b-0 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+          {article.category} <span className="font-normal text-gray-400">·</span> {article.readTime}
+        </p>
+        <h2 className="mt-2 font-serif text-xl font-semibold leading-snug tracking-tight text-[#111] sm:text-2xl">
+          <Link to="/post" className="text-inherit no-underline hover:text-gray-700">
+            {article.title}
+          </Link>
+        </h2>
+        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-600">{article.excerpt}</p>
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-gray-500">
+          <time dateTime={date}>{date}</time>
+          <button
+            type="button"
+            className="rounded p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Save story"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="rounded p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+            aria-label="More options"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <circle cx="5" cy="12" r="1.5" />
+              <circle cx="12" cy="12" r="1.5" />
+              <circle cx="19" cy="12" r="1.5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <Link to="/post" className="shrink-0 no-underline sm:pt-1" tabIndex={-1} aria-hidden>
+        <img
+          src={article.image}
+          alt=""
+          className="h-28 w-full rounded-md object-cover grayscale sm:h-24 sm:w-40"
+        />
+      </Link>
+    </article>
+  );
+}
+
+function ProfileFooter() {
+  return (
+    <footer className="border-t border-gray-100 bg-white">
+      <div className="mx-auto flex max-w-7xl flex-col justify-between gap-8 px-4 py-12 text-sm text-gray-500 sm:px-8 md:flex-row md:items-end lg:px-12">
+        <div>
+          <p className="text-base font-semibold tracking-wide text-[#111]">MUSK</p>
+          <p className="mt-2 max-w-sm text-xs leading-relaxed text-gray-500">
+            Crafting stories and ideas for the modern reader. Discover high-quality articles across inspiring themes.
+          </p>
+          <p className="mt-4 text-xs text-gray-400">© 2026 MUSK. All rights reserved.</p>
+        </div>
+        <div className="grid grid-cols-2 gap-10 text-xs">
+          <div className="space-y-2">
+            <p className="font-semibold uppercase tracking-wider text-gray-700">Company</p>
+            <p className="cursor-pointer hover:text-gray-800">About</p>
+            <p className="cursor-pointer hover:text-gray-800">Careers</p>
+          </div>
+          <div className="space-y-2">
+            <p className="font-semibold uppercase tracking-wider text-gray-700">Support</p>
+            <p className="cursor-pointer hover:text-gray-800">Contact</p>
+            <p className="cursor-pointer hover:text-gray-800">Privacy Policy</p>
+            <p className="cursor-pointer hover:text-gray-800">Terms of Service</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export function ProfilePage() {
+  const [tab, setTab] = useState<ProfileTab>('published');
+
+  return (
+    <div className="flex min-h-screen flex-col bg-white text-[#1a1a1a]">
       <div className="border-b border-gray-100 px-4 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-7xl pt-6 pb-4">
           <Navbar />
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-7xl min-h-[calc(100vh-5rem)]">
+      <div className="mx-auto flex w-full max-w-7xl flex-1">
         <aside className="hidden w-[220px] shrink-0 border-r border-gray-100 bg-[#f9f9f9] px-5 py-8 md:flex md:flex-col lg:w-[260px] lg:px-7">
           <div>
             <p className="font-semibold tracking-tight text-[#111]">Library</p>
@@ -175,9 +264,62 @@ export function ProfilePage() {
                 <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Following</p>
               </div>
             </div>
+
+            <div className="mt-10 border-t border-gray-100 pt-2">
+              <div className="flex gap-8 border-b border-gray-200" role="tablist" aria-label="Profile content">
+                {(
+                  [
+                    { id: 'published' as const, label: 'Published' },
+                    { id: 'highlights' as const, label: 'Highlights' },
+                    { id: 'drafts' as const, label: 'Drafts' },
+                  ] as const
+                ).map(({ id, label }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === id}
+                    onClick={() => setTab(id)}
+                    className={`-mb-px border-b-2 pb-3 text-sm font-medium transition ${
+                      tab === id
+                        ? 'border-[#111] text-[#111]'
+                        : 'border-transparent text-gray-500 hover:text-gray-800'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="pt-2" role="tabpanel">
+                {tab === 'published' && (
+                  <div>
+                    {publishedFeed.map(({ article, date }) => (
+                      <ProfileStoryRow key={article.id} article={article} date={date} />
+                    ))}
+                    <div className="flex justify-center pt-4 pb-2">
+                      <Link
+                        to="/"
+                        className="rounded-md border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 no-underline transition hover:border-gray-400 hover:bg-gray-50"
+                      >
+                        Show all stories
+                      </Link>
+                    </div>
+                  </div>
+                )}
+                {tab === 'highlights' && (
+                  <p className="py-14 text-center text-sm text-gray-500">No highlighted stories yet.</p>
+                )}
+                {tab === 'drafts' && (
+                  <p className="py-14 text-center text-sm text-gray-500">No drafts saved.</p>
+                )}
+              </div>
+            </div>
           </div>
         </main>
       </div>
+
+      <ProfileFooter />
     </div>
   );
 }
