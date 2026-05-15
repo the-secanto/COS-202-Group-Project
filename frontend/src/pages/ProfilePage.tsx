@@ -59,7 +59,7 @@ function ProfileStoryRow({ article, date }: { article: BlogArticle; date: string
           {article.category} <span className="font-normal text-gray-400">·</span> {article.readTime}
         </p>
         <h2 className="mt-2 font-serif text-xl font-semibold leading-snug tracking-tight text-[#111] sm:text-2xl">
-          <Link to="/post" className="text-inherit no-underline hover:text-gray-700">
+          <Link to={`/post/${article.id}`} className="text-inherit no-underline hover:text-gray-700">
             {article.title}
           </Link>
         </h2>
@@ -88,7 +88,7 @@ function ProfileStoryRow({ article, date }: { article: BlogArticle; date: string
           </button>
         </div>
       </div>
-      <Link to="/post" className="shrink-0 no-underline sm:pt-1" tabIndex={-1} aria-hidden>
+      <Link to={`/post/${article.id}`} className="shrink-0 no-underline sm:pt-1" tabIndex={-1} aria-hidden>
         <img
           src={article.image}
           alt=""
