@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar.tsx';
+import { PageLayout } from '../components/PageLayout.tsx';
 import { articles } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
 
@@ -101,8 +102,8 @@ function ProfileStoryRow({ article, date }: { article: BlogArticle; date: string
 
 function ProfileFooter() {
   return (
-    <footer className="border-t border-gray-100 bg-white">
-      <div className="mx-auto flex max-w-7xl flex-col justify-between gap-8 px-4 py-12 text-sm text-gray-500 sm:px-8 md:flex-row md:items-end lg:px-12">
+    <footer className="border-t border-gray-100 p-6 md:p-10 pt-10">
+      <div className="flex flex-col justify-between gap-8 text-sm text-gray-500 md:flex-row md:items-end">
         <div>
           <p className="text-base font-semibold tracking-wide text-[#111]">MUSK</p>
           <p className="mt-2 max-w-sm text-xs leading-relaxed text-gray-500">
@@ -132,14 +133,12 @@ export function ProfilePage() {
   const [tab, setTab] = useState<ProfileTab>('published');
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-[#1a1a1a]">
-      <div className="border-b border-gray-100 px-4 sm:px-8 lg:px-12">
-        <div className="mx-auto max-w-7xl pt-6 pb-4">
-          <Navbar />
-        </div>
+    <PageLayout mainClassName="flex flex-col p-0 text-[#1a1a1a]">
+      <div className="border-b border-gray-100 p-6 md:p-10">
+        <Navbar />
       </div>
 
-      <div className="mx-auto flex w-full max-w-7xl flex-1">
+      <div className="flex">
         <aside className="hidden w-[220px] shrink-0 border-r border-gray-100 bg-[#f9f9f9] px-5 py-8 md:flex md:flex-col lg:w-[260px] lg:px-7">
           <div>
             <p className="font-semibold tracking-tight text-[#111]">Library</p>
@@ -190,7 +189,7 @@ export function ProfilePage() {
           </div>
         </aside>
 
-        <main className="flex-1 px-4 py-8 sm:px-8 lg:px-12 lg:py-10">
+        <main className="flex-1 p-6 md:p-10">
           <div className="mx-auto max-w-3xl">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
               <img
@@ -320,6 +319,6 @@ export function ProfilePage() {
       </div>
 
       <ProfileFooter />
-    </div>
+    </PageLayout>
   );
 }

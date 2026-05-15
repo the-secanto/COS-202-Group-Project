@@ -4,6 +4,7 @@ import { CategoryTabs } from '../components/CategoryTabs.tsx';
 import { ArticlesSection } from '../components/ArticlesSection.tsx';
 import { Footer } from '../components/Footer.tsx';
 import { Navbar } from '../components/Navbar.tsx';
+import { PageLayout } from '../components/PageLayout.tsx';
 import { articles, categories } from '../data/articles.ts';
 
 export function HomePage() {
@@ -30,8 +31,7 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] py-8 text-[#1f1f1f]">
-      <main className="mx-auto w-[92%] max-w-6xl rounded-md bg-white p-6 shadow-sm md:p-10">
+    <PageLayout>
         <Navbar />
         <HeroSection />
         <CategoryTabs
@@ -53,7 +53,6 @@ export function HomePage() {
         </div>
 
         <Footer />
-      </main>
-    </div>
+    </PageLayout>
   );
 }
