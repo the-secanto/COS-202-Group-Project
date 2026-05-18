@@ -74,15 +74,14 @@ It features a backend built with Node.js and Express, and a frontend developed u
 ### 🔐 Login Page
 ![Login](./UI_Screenshots/login.png)
 
-## 👥 Contributors
-1. Frontend - Dike Monalisa and Oamen Precious 
-2. Backend - Borke Reuben and Talent -Ajieh Precious
-3. Integration - Oloyede Ifeoluwa
-4. Documentation - Yusuf -Awari Maryam and Usen Emmanuel
-5. Team Lead - Sipeolu Emmanuel 
-
 ## 🌐 Live Demo
 Link: Coming soon...
 
+## 📋 Prerequisites
+Ensure you have the following installed on your machine:
+- Node.js (v18 or later)
+- npm or yarn
+- PostgreSQL
+- Git
 
 
