@@ -6,7 +6,6 @@ import generateTokens from "../../utils/generateTokens.js"
 const register = async (req, res) => {
 
     const { email, name, password } = req.body
-    res.json({ email, name, password })
 
     const userExists = await prisma.User.findUnique({
         where: { email: email }
