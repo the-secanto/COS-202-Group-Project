@@ -1,12 +1,13 @@
 import express from 'express'
-import { Posts } from '../controllers/posts_Controllers.js'
+import { Posts, deletepost } from '../controllers/posts_Controllers.js'
 import { authMiddleware } from '../middleware/authMiddleware.js'
-//import { register, login, logout } from '../controllers/authControllers.js'
+import { register, login, logout } from '../controllers/authControllers.js'
 
 const router = express.Router()
 router.use(authMiddleware)
 
-router.post('/', Posts)
+router.get('/', Posts)
+router.delete('/:id', deletepost)
 
 //router.post('/login', login)
 
