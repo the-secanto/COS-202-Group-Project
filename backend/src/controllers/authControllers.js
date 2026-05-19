@@ -6,9 +6,8 @@ import generateTokens from "../../utils/generateTokens.js"
 const register = async (req, res) => {
 
     const { email, name, password } = req.body
-    res.json({ email, name, password })
 
-    const userExists = await prisma.user.findUnique({
+    const userExists = await prisma.User.findUnique({
         where: { email: email }
     })
 
@@ -19,7 +18,7 @@ const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
-    const user = await prisma.user.create({
+    const user = await prisma.User.create({
         data: {
             email,
             name,
@@ -41,7 +40,7 @@ const login = async (req, res) => {
 
     const { email, password } = req.body
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.User.findUnique({
         where: { email: email }
     })
 
