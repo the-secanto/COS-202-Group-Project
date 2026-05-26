@@ -8,14 +8,14 @@ type ArticlesSectionProps = {
 export function ArticlesSection({ articles }: ArticlesSectionProps) {
   if (articles.length === 0) {
     return (
-      <section className="py-14 text-center text-gray-500">
+      <section className="rounded-xl border border-dashed border-border py-14 text-center text-sm text-muted-foreground">
         No articles in this category yet.
       </section>
     );
   }
 
   return (
-    <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {articles.map((article) => (
         <ArticleCard key={article.id} article={article} />
       ))}

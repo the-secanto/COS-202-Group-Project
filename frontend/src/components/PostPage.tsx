@@ -1,205 +1,219 @@
+import { type FormEvent, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { articles } from '../data/articles.ts';
+import type { BlogArticle } from '../data/articles.ts';
 import { Footer } from './Footer.tsx';
 import { Navbar } from './Navbar.tsx';
+import { PageLayout } from './PageLayout.tsx';
+import { ArticleCard } from './ArticleCard.tsx';
+
+type CommentEntry = {
+  id: string;
+  author: string;
+  avatar: string;
+  body: string;
+  timeLabel: string;
+};
+
+const initialComments: CommentEntry[] = [
+  {
+    id: 'c1',
+    author: 'Emma J.',
+    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Emma&backgroundColor=e8ecf1',
+    body: 'This perspective helped me rethink my entire setup. Fewer tools really do reduce friction.',
+    timeLabel: '2 hours ago',
+  },
+  {
+    id: 'c2',
+    author: 'Julien V.',
+    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Julien&backgroundColor=e8ecf1',
+    body: 'I started a no-notification workday after reading this. The difference in concentration is huge.',
+    timeLabel: '6 hours ago',
+  },
+];
+
+function resolveArticle(articleId: string | undefined): BlogArticle | undefined {
+  if (!articleId) return undefined;
+  const n = Number.parseInt(articleId, 10);
+  return Number.isFinite(n) ? articles.find((a) => a.id === n) : undefined;
+}
 
 export function PostPage() {
+  const { articleId } = useParams();
+  const article = useMemo(() => resolveArticle(articleId) ?? articles[0], [articleId]);
+
+  const related = useMemo(
+    () => articles.filter((a) => a.id !== article.id && a.category === article.category).slice(0, 3),
+    [article],
+  );
+
+  const paragraphs = useMemo(
+    () => [
+      article.excerpt,
+      'Modern software often asks for constant attention, but thoughtful design asks for restraint. The less your tools demand from you, the more your work can demand from you.',
+      'Simplicity is not the absence of choice; it is the presence of enough.',
+      'The architecture of focus is built from small decisions repeated daily. Fewer tabs. Clearer files. More complete thoughts. Over time, the discipline of subtraction reshapes not just our workflow but our attention itself.',
+      'There is a quiet confidence to writing in a single, well-lit page — no banners, no badges, no nudges. Just the cursor, and the next sentence.',
+    ],
+    [article],
+  );
+
+  const [comments, setComments] = useState<CommentEntry[]>(initialComments);
+  const [commentName, setCommentName] = useState('');
+  const [commentBody, setCommentBody] = useState('');
+
+  const handlePostComment = (e: FormEvent) => {
+    e.preventDefault();
+    const body = commentBody.trim();
+    if (!body) return;
+    const author = commentName.trim() || 'Reader';
+    setComments((prev) => [
+      {
+        id: `c-${Date.now()}`,
+        author,
+        avatar: `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(author)}&backgroundColor=e8ecf1`,
+        body,
+        timeLabel: 'Just now',
+      },
+      ...prev,
+    ]);
+    setCommentBody('');
+    setCommentName('');
+  };
+
   return (
-    <div className="min-h-screen bg-[#f5f5f7] py-8 text-[#1f1f1f] md:py-10">
-      <main className="mx-auto w-[92%] max-w-5xl rounded-md bg-white px-6 py-6 shadow-sm md:px-10 md:py-8">
-        <Navbar />
+    <PageLayout mainClassName="px-0">
+      <Navbar />
 
-        <article className="mx-auto max-w-2xl">
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400">
-            Technology · 6 min read
-          </p>
+      <article className="mx-auto max-w-3xl px-6 py-12 md:px-10">
+        <Link to="/" className="text-xs text-muted-foreground no-underline hover:text-foreground">← Back to journal</Link>
 
-          <h1 className="text-2xl font-semibold leading-tight text-gray-900 md:text-[2rem]">
-            The Quiet Revolution of Minimal Computing
-          </h1>
+        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+          {article.category} · {article.readTime}
+        </p>
+        <h1 className="mt-3 font-serif text-3xl font-semibold leading-tight text-foreground md:text-5xl">
+          {article.title}
+        </h1>
+        <p className="mt-4 text-lg text-muted-foreground">{article.excerpt}</p>
 
-          <div className="mt-6 flex items-center gap-3">
+        <div className="mt-6 flex items-center gap-3 border-y border-border py-4">
+          <Link
+            to={`/profile/${encodeURIComponent(article.author)}`}
+            aria-label={`View ${article.author}'s profile`}
+            className="no-underline"
+          >
             <img
-              src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
-              alt="Author avatar"
-              className="h-10 w-10 rounded-full object-cover"
+              src={article.authorAvatar}
+              alt=""
+              className="h-10 w-10 rounded-full bg-muted object-cover transition hover:opacity-80"
             />
-            <div>
-              <p className="text-sm font-medium text-gray-800">Marcus Thorne</p>
-              <p className="text-xs text-gray-500">Design Philosopher · Apr 16, 2026</p>
-            </div>
+          </Link>
+          <div className="flex-1">
+            <Link
+              to={`/profile/${encodeURIComponent(article.author)}`}
+              className="text-sm font-semibold text-foreground no-underline hover:underline"
+            >
+              {article.author}
+            </Link>
+            <p className="text-xs text-muted-foreground">{article.date} · {article.readTime}</p>
           </div>
+          <button
+            type="button"
+            className="rounded-full border border-border px-4 py-1.5 text-xs font-semibold text-foreground transition hover:bg-muted"
+          >
+            Follow
+          </button>
+        </div>
 
-          <figure className="mt-8 border-t border-gray-100 pt-6">
-            <img
-              src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80"
-              alt="Minimal desk setup"
-              className="h-[300px] w-full rounded-sm object-cover md:h-[330px]"
+        <figure className="mt-8">
+          <img src={article.image} alt="" className="h-72 w-full rounded-xl object-cover md:h-96" />
+        </figure>
+
+        <div className="prose mt-10 space-y-6 font-serif text-lg leading-relaxed text-foreground/90">
+          {paragraphs.map((p, i) =>
+            i === 2 ? (
+              <blockquote
+                key={i}
+                className="border-l-4 border-primary pl-5 font-serif text-xl italic text-foreground"
+              >
+                {p}
+              </blockquote>
+            ) : (
+              <p key={i}>{p}</p>
+            ),
+          )}
+        </div>
+
+        <div className="mt-10 flex flex-wrap items-center gap-3 border-y border-border py-4 text-sm">
+          <button className="rounded-full bg-muted px-4 py-1.5 text-foreground hover:bg-border">♥ 408</button>
+          <button className="rounded-full bg-muted px-4 py-1.5 text-foreground hover:bg-border">💬 {comments.length}</button>
+          <button className="rounded-full bg-muted px-4 py-1.5 text-foreground hover:bg-border">Share</button>
+          <button className="ml-auto rounded-full bg-muted px-4 py-1.5 text-foreground hover:bg-border">Save</button>
+        </div>
+
+        <section className="mt-12">
+          <h2 className="font-serif text-2xl font-semibold text-foreground">
+            Comments ({comments.length})
+          </h2>
+
+          <form
+            onSubmit={handlePostComment}
+            className="mt-5 rounded-xl border border-border bg-surface p-4 md:p-5"
+          >
+            <input
+              type="text"
+              value={commentName}
+              onChange={(e) => setCommentName(e.target.value)}
+              placeholder="Your name (optional)"
+              className="mb-3 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
             />
-            <figcaption className="mt-2 text-center text-xs text-gray-400">
-              The beauty of a focused environment.
-            </figcaption>
-          </figure>
-
-          <div className="mt-8 space-y-5 text-[14px] leading-8 text-gray-700 md:text-[15px]">
-            <p>
-              It was on a rain-soaked afternoon I first powered this machine. No notifications, no
-              startup banners, no digital noise. Just one cursor, one text field, and the sound of
-              keys striking with intention.
-            </p>
-            <p>
-              Modern software often asks for constant attention, but this discipline asks for
-              restraint. The less your tools demand from you, the more your work can demand from
-              you.
-            </p>
-            <p className="border-l-2 border-indigo-500 pl-4 italic text-gray-600">
-              Simplicity is not the absence of choice; it is the presence of enough.
-            </p>
-            <p>
-              The architecture of focus is built from small decisions repeated daily. Fewer tabs.
-              Clearer files. More complete thoughts.
-            </p>
-          </div>
-
-          <div className="mt-10 border-y border-gray-100 py-4">
-            <div className="flex flex-wrap items-center gap-2.5">
+            <textarea
+              value={commentBody}
+              onChange={(e) => setCommentBody(e.target.value)}
+              required
+              rows={3}
+              placeholder="Share your thoughts…"
+              className="w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+            />
+            <div className="mt-3 flex justify-end">
               <button
-                type="button"
-                className="rounded-md border border-gray-200 px-3.5 py-2 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 md:text-sm"
+                type="submit"
+                className="rounded-full bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90"
               >
-                Likes (408)
-              </button>
-              <button
-                type="button"
-                className="rounded-md border border-gray-200 px-3.5 py-2 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 md:text-sm"
-              >
-                Share
+                Publish comment
               </button>
             </div>
-          </div>
+          </form>
 
-          <section className="mt-10">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <h2 className="text-lg font-semibold text-gray-900">Readers Comments (48)</h2>
-              <button
-                type="button"
-                className="rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500"
-              >
-                Post a comment
-              </button>
-            </div>
-
-            <div className="space-y-4 border-t border-gray-100 pt-6">
-              <article className="rounded-md border border-gray-100 bg-[#fcfcfd] p-4">
-                <div className="flex items-start gap-3">
-                  <img
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80"
-                    alt="Commenter avatar"
-                    className="h-9 w-9 rounded-full object-cover"
-                  />
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <p className="text-sm font-semibold text-gray-900">Emma J.</p>
-                      <span className="text-xs text-gray-400">2 hours ago</span>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-gray-600">
-                      This perspective helped me rethink my entire setup. Fewer tools really do
-                      reduce friction and improve the quality of focused work.
-                    </p>
-                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-                      <button type="button" className="transition hover:text-gray-800">
-                        Like
-                      </button>
-                      <button type="button" className="transition hover:text-gray-800">
-                        Reply
-                      </button>
-                    </div>
+          <div className="mt-6 space-y-5">
+            {comments.map((c) => (
+              <div key={c.id} className="flex items-start gap-3">
+                <img src={c.avatar} alt="" className="h-9 w-9 shrink-0 rounded-full bg-muted object-cover" />
+                <div className="min-w-0 flex-1 rounded-xl bg-surface border border-border p-4">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-foreground">{c.author}</p>
+                    <span className="text-xs text-subtle">· {c.timeLabel}</span>
                   </div>
+                  <p className="mt-1 text-sm text-foreground/80">{c.body}</p>
                 </div>
-              </article>
-
-              <article className="rounded-md border border-gray-100 bg-[#fcfcfd] p-4">
-                <div className="flex items-start gap-3">
-                  <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
-                    alt="Commenter avatar"
-                    className="h-9 w-9 rounded-full object-cover"
-                  />
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <p className="text-sm font-semibold text-gray-900">Julien V.</p>
-                      <span className="text-xs text-gray-400">6 hours ago</span>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-gray-600">
-                      I started a no-notification workday after reading this. The difference in
-                      concentration is huge, especially for long-form writing sessions.
-                    </p>
-                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-                      <button type="button" className="transition hover:text-gray-800">
-                        Like
-                      </button>
-                      <button type="button" className="transition hover:text-gray-800">
-                        Reply
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-
-              <article className="rounded-md border border-gray-100 bg-[#fcfcfd] p-4">
-                <div className="flex items-start gap-3">
-                  <img
-                    src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=120&q=80"
-                    alt="Commenter avatar"
-                    className="h-9 w-9 rounded-full object-cover"
-                  />
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <p className="text-sm font-semibold text-gray-900">Noah K.</p>
-                      <span className="text-xs text-gray-400">1 day ago</span>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-gray-600">
-                      Great read. Minimal computing feels less like a trend and more like a
-                      practical design philosophy for modern creators.
-                    </p>
-                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-                      <button type="button" className="transition hover:text-gray-800">
-                        Like
-                      </button>
-                      <button type="button" className="transition hover:text-gray-800">
-                        Reply
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <section className="mt-10 rounded-md border border-gray-100 bg-[#fafafa] p-4 md:p-5">
-            <div className="flex items-start gap-3">
-              <img
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
-                alt="Author avatar"
-                className="h-10 w-10 rounded-md object-cover"
-              />
-              <div>
-                <p className="text-sm font-semibold text-gray-900">Marcus Thorne</p>
-                <p className="mt-1 text-xs leading-5 text-gray-500">
-                  Author of design-philosophy essays and practical notes on digital focus. His
-                  writing explores how minimal tools shape better thinking.
-                </p>
-                <button
-                  type="button"
-                  className="mt-3 text-xs font-semibold text-indigo-600 transition hover:text-indigo-500"
-                >
-                  View all publications
-                </button>
               </div>
+            ))}
+          </div>
+        </section>
+
+        {related.length > 0 && (
+          <section className="mt-16">
+            <h2 className="mb-6 font-serif text-2xl font-semibold text-foreground">More in {article.category}</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((r) => (
+                <ArticleCard key={r.id} article={r} />
+              ))}
             </div>
           </section>
-        </article>
+        )}
+      </article>
 
-        <Footer />
-      </main>
-    </div>
+      <Footer />
+    </PageLayout>
   );
 }

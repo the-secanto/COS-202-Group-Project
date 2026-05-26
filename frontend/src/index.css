@@ -1,1 +1,53 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Lora", ui-serif, Georgia, serif;
+
+  --color-background: hsl(220 17% 98%);
+  --color-surface: hsl(0 0% 100%);
+  --color-foreground: hsl(222 30% 11%);
+  --color-muted: hsl(213 21% 93%);
+  --color-muted-foreground: hsl(215 16% 47%);
+  --color-subtle: hsl(215 16% 65%);
+  --color-border: hsl(213 21% 91%);
+  --color-primary: hsl(217 91% 60%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-primary-soft: hsl(217 91% 96%);
+  --color-accent: hsl(222 30% 11%);
+}
+
+.dark {
+  --color-background: hsl(222 30% 8%);
+  --color-surface: hsl(222 25% 12%);
+  --color-foreground: hsl(220 17% 96%);
+  --color-muted: hsl(222 20% 18%);
+  --color-muted-foreground: hsl(215 16% 70%);
+  --color-subtle: hsl(215 16% 50%);
+  --color-border: hsl(222 20% 22%);
+  --color-primary: hsl(217 91% 65%);
+  --color-primary-foreground: hsl(222 30% 8%);
+  --color-primary-soft: hsl(217 60% 20%);
+  --color-accent: hsl(220 17% 96%);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-foreground);
+    background: var(--color-background);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+  h1, h2, h3, .font-serif {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+  a { color: inherit; }
+}
