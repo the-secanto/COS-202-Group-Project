@@ -50,7 +50,7 @@ const publishedFeed: { article: BlogArticle; date: string }[] = articles.slice(0
   date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][i] ?? 'Jan 1, 2026',
 }));
 
-type ProfileTab = 'published' | 'highlights' | 'drafts';
+type ProfileTab = 'published' | 'saves' | 'drafts';
 
 function ProfileStoryRow({ article, date }: { article: BlogArticle; date: string }) {
   return (
@@ -158,12 +158,6 @@ export function ProfilePage() {
           </div>
 
           <div className="mt-auto pt-10">
-            <button
-              type="button"
-              className="w-full rounded-md bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-500"
-            >
-              Become a member
-            </button>
             <div className="mt-8 flex flex-col gap-1 border-t border-gray-200/80 pt-6">
               <Link
                 to="/"
@@ -269,7 +263,7 @@ export function ProfilePage() {
                 {(
                   [
                     { id: 'published' as const, label: 'Published' },
-                    { id: 'highlights' as const, label: 'Highlights' },
+                    { id: 'saves' as const, label: 'Saves' },
                     { id: 'drafts' as const, label: 'Drafts' },
                   ] as const
                 ).map(({ id, label }) => (
@@ -306,7 +300,7 @@ export function ProfilePage() {
                     </div>
                   </div>
                 )}
-                {tab === 'highlights' && (
+                {tab === 'saves' && (
                   <p className="py-14 text-center text-sm text-gray-500">No highlighted stories yet.</p>
                 )}
                 {tab === 'drafts' && (
