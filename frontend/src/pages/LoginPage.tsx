@@ -1,14 +1,27 @@
-import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
-import { AuthLayout } from "../AuthLayout";
+import { useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthLayout } from '../AuthLayout';
+import { loginUser, saveAuthToken } from '../utils/api.ts';
 
 export function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // UI only
+    setError('');
+
+    try {
+      const data = await loginUser({ email, password });
+      if (data?.token) {
+        saveAuthToken(data.token);
+      }
+      navigate('/');
+    } catch (err) {
+      setError((err as Error).message || 'Login failed.');
+    }
   };
 
   return (
@@ -51,17 +64,18 @@ export function LoginPage() {
           />
         </div>
 
-        <button 
-          type="submit" 
+        {error && <div className="text-sm text-red-600">{error}</div>}
+
+        <button
+          type="submit"
           className="w-full h-12 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-colors shadow-sm"
         >
           Sign In
         </button>
       </form>
 
-
       <p className="mt-8 text-center text-sm text-gray-500">
-        Don't have an account?{" "}
+        Don't have an account?{' '}
         <Link to="/signup" className="text-indigo-600 font-semibold hover:underline">
           Sign Up
         </Link>

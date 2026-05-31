@@ -5,35 +5,63 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  name             String?
+  password         String
+  posts            Post[]
+  createdAt        DateTime  @default(now())
+  comments         Comment[]
+  avatar           String? // URL e.g. "https://cdn.example.com/avatar.jpg"
+  resetToken       String? // For password reset functionality
+  resetTokenExpiry DateTime?
+  following        Follow[]  @relation("following")
+  followers        Follow[]  @relation("followers")
+}
+
 model Post {
-  id        String   @id @default(uuid())
-  title     String
-  content   String?
-  isDraft   Boolean  @default(true)
-  images    Image[]
-  authorId  String
+  id         Int       @id @default(autoincrement())
+  title      String
+  content    String?
+  published  Boolean   @default(false)
+  authorId   Int
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments   Comment[]
+  tags       Tag[]
+  coverPhoto String? // URL e.g. "https://cdn.example.com/image.jpg"
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  Int
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  password  String
-  posts     Post[]
-  createdAt DateTime @default(now())
+model Follow {
+  followerId  Int
+  follower    User     @relation("following", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId Int
+  following   User     @relation("followers", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
 }
 
-model Image {
-  id     String @id @default(uuid())
-  data   Bytes
-  postId String
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+enum Tag {
+  Technology
+  Lifestyle
+  Startup
+  Finance
 }

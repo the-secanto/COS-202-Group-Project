@@ -12,6 +12,12 @@ lerna-debug.log*
 .env
 node_modules/
 /src/generated/prisma
+/backend/generated
+/backend/node_modules
+/backend/.DS_Store
+/backend/prisma/migrations
+/frontend/node_modules
+
 
 node_modules
 dist
