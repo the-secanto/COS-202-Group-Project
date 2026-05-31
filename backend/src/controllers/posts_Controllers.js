@@ -106,7 +106,8 @@ export const getFeed = async (req, res) => {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        avatar: true
                     }
                 }
             },
@@ -139,6 +140,7 @@ export const getPostById = async (req, res) => {
                     select: {
                         id: true,
                         name: true,
+                        avatar: true,
                     }
                 }
             }
