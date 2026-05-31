@@ -133,7 +133,7 @@ export const likeComment = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const existingLike = await prisma.like.findUnique({
+    const existingLike = await prisma.commentLike.findUnique({
       where: {
         userId_commentId: {
           userId,
@@ -146,14 +146,14 @@ export const likeComment = async (req, res) => {
       return res.status(400).json({ error: "Already liked" });
     }
 
-    await prisma.like.create({
+    await prisma.commentLike.create({
       data: {
         userId,
         commentId
       }
     });
 
-    const likesCount = await prisma.like.count({
+    const likesCount = await prisma.commentLike.count({
       where: { commentId }
     });
 
@@ -170,7 +170,7 @@ export const unlikeComment = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    await prisma.like.delete({
+    await prisma.commentLike.delete({
       where: {
         userId_commentId: {
           userId,
@@ -179,7 +179,7 @@ export const unlikeComment = async (req, res) => {
       }
     });
 
-    const likesCount = await prisma.like.count({
+    const likesCount = await prisma.commentLike.count({
       where: { commentId }
     });
 

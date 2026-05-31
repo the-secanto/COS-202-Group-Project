@@ -65,11 +65,17 @@ export const fetchFeed = () => request('/posts/fyp');
 export const fetchPostById = (id: string | number) => request(`/posts/${id}`);
 export const fetchProfile = (idOrName: string | number) => request(`/profile/${encodeURIComponent(String(idOrName))}`);
 export const fetchComments = (postId: string | number) => request(`/comments/${postId}`);
-export const submitComment = (body: { postId: number; author: string; content: string }) =>
+export const submitComment = (body: { postId: number; content: string; parentId?: number }) =>
   request('/comments', {
     method: 'POST',
     body: JSON.stringify(body),
   });
+
+export const likePost = (id: number) => request(`/posts/${id}/like`, { method: 'POST' });
+export const unlikePost = (id: number) => request(`/posts/${id}/like`, { method: 'DELETE' });
+export const savePost = (id: number) => request(`/posts/${id}/save`, { method: 'POST' });
+export const unsavePost = (id: number) => request(`/posts/${id}/save`, { method: 'DELETE' });
+export const fetchSavedPosts = () => request('/posts/saved');
 
 export const followUser = (followingId: number) =>
   request('/users/follow', {

@@ -138,7 +138,9 @@ export function CreatePage() {
 
             <input
               type="date"
-              className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-500 outline-none"
+              value={new Date().toISOString().split('T')[0]}
+              readOnly
+              className="w-full rounded-md border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-400 outline-none cursor-not-allowed"
             />
           </div>
 

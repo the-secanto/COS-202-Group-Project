@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar.tsx';
 import { PageLayout } from '../components/PageLayout.tsx';
 import { articles } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
-import { fetchProfile } from '../utils/api.ts';
+import { fetchProfile, followUser, unfollowUser } from '../utils/api.ts';
+import { useAuth } from '../context/AuthContext';
 
 const topics = [
 // ... (rest of topics)
@@ -137,6 +138,7 @@ function ProfileFooter() {
 
 export function ProfilePage() {
   const { authorName } = useParams();
+  const navigate = useNavigate();
   const { user: authUser } = useAuth();
   const currentAuthorName = authorName ? decodeURIComponent(authorName) : (authUser?.name || 'Elena Vance');
   const isOwnProfile = authUser?.name === currentAuthorName;
@@ -147,6 +149,8 @@ export function ProfilePage() {
 
   // Profile editing state
   const [isEditing, setIsEditing] = useState(false);
+  const [profileId, setProfileId] = useState<number | null>(null);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: currentAuthorName,
     bio: 'Creative Director & Design Philosopher. Exploring the intersection of digital ethics, minimalist aesthetics, and the future of human-computer interaction. Currently archiving thoughts on Lumina.',
@@ -168,6 +172,8 @@ export function ProfilePage() {
 
       try {
         const profile = await fetchProfile(currentAuthorName);
+        setProfileId(profile.id);
+        setIsFollowing(profile.isFollowing);
         setProfileData((prev) => ({
           ...prev,
           name: profile.name || currentAuthorName,
@@ -191,7 +197,7 @@ export function ProfilePage() {
                 readTime: post.content ? `${Math.max(1, Math.ceil(String(post.content).length / 250))} min read` : '1 min read',
                 image: post.coverPhoto || 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
               },
-              date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][index % 4] ?? 'Jan 1, 2026',
+              date: post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'Jan 1, 2026',
             })),
           );
         }
@@ -205,6 +211,27 @@ export function ProfilePage() {
 
     loadProfile();
   }, [currentAuthorName]);
+
+  const handleFollowToggle = async () => {
+    if (!authUser) {
+      navigate('/login');
+      return;
+    }
+    if (!profileId) return;
+
+    try {
+      if (isFollowing) {
+        await unfollowUser(profileId);
+        setProfileCounts((prev) => ({ ...prev, followers: prev.followers - 1 }));
+      } else {
+        await followUser(profileId);
+        setProfileCounts((prev) => ({ ...prev, followers: prev.followers + 1 }));
+      }
+      setIsFollowing(!isFollowing);
+    } catch (err) {
+      console.error('Follow toggle failed:', err);
+    }
+  };
 
   useEffect(() => {
     setSavedArticles(
@@ -344,9 +371,14 @@ export function ProfilePage() {
                       {!isOwnProfile && (
                         <button
                           type="button"
-                          className="rounded-md bg-violet-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+                          onClick={handleFollowToggle}
+                          className={`rounded-md px-4 py-1.5 text-sm font-semibold transition ${
+                            isFollowing 
+                              ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
+                              : 'bg-violet-600 text-white hover:bg-violet-500'
+                          }`}
                         >
-                          Follow
+                          {isFollowing ? 'Following' : 'Follow'}
                         </button>
                       )}
                       {isOwnProfile && (

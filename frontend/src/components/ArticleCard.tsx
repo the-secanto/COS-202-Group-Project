@@ -1,6 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import type { BlogArticle } from '../data/articles.ts';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
+import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 
 type ArticleCardProps = {
   article: BlogArticle;
@@ -8,11 +10,23 @@ type ArticleCardProps = {
 
 export function ArticleCard({ article }: ArticleCardProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toggleSave, isSaved } = useSavedPosts();
+  const [actionMessage, setActionMessage] = useState('');
   const saved = isSaved(article.id);
+
+  const showLoginPrompt = (action: string) => {
+    setActionMessage(`Please login/signup to ${action} this story.`);
+    setTimeout(() => setActionMessage(''), 3000);
+  };
 
   return (
     <div className="group relative h-full overflow-hidden rounded-md border border-gray-100 bg-white shadow-sm transition hover:border-gray-200 hover:shadow-md">
+      {actionMessage && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 rounded-full bg-indigo-600 px-6 py-2 text-sm font-semibold text-white shadow-lg animate-bounce">
+          {actionMessage}
+        </div>
+      )}
       {/* Primary Link Overlay */}
       <Link
         to={`/post/${article.id}`}
@@ -31,14 +45,18 @@ export function ArticleCard({ article }: ArticleCardProps) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              toggleSave(article.id);
+              if (!user) {
+                showLoginPrompt('save');
+              } else {
+                toggleSave(article.id);
+              }
             }}
             className={`absolute right-3 top-3 z-10 rounded-full bg-white/90 p-1.5 shadow-sm transition hover:bg-white ${
-              saved ? 'text-indigo-600' : 'text-gray-400'
+              saved && user ? 'text-indigo-600' : 'text-gray-400'
             }`}
-            aria-label={saved ? "Unsave story" : "Save story"}
+            aria-label={saved && user ? "Unsave story" : "Save story"}
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill={saved && user ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden>
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
             </svg>
           </button>

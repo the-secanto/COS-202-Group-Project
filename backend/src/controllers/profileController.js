@@ -3,10 +3,11 @@ import jwt from 'jsonwebtoken'
 
 export const getProfile = async (req, res) => {
     const { id } = req.params
-    const parsedId = parseInt(id, 10)
+    const decodedId = decodeURIComponent(id)
+    const parsedId = parseInt(decodedId, 10)
 
     const where = Number.isNaN(parsedId)
-        ? { name: id }
+        ? { name: { equals: decodedId, mode: 'insensitive' } }
         : { id: parsedId }
 
     try {
