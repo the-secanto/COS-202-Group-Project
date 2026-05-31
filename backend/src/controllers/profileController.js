@@ -23,7 +23,7 @@ export const getProfile = async (req, res) => {
                 },
                 posts: {
                     where: { published: true },
-                    orderBy: { createdAt: 'desc' },
+                    orderBy: { id: 'desc' },
                 },
             },
         })
