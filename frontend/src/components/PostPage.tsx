@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { articles } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
 import { Footer } from './Footer.tsx';
@@ -7,6 +7,7 @@ import { Navbar } from './Navbar.tsx';
 import { PageLayout } from './PageLayout.tsx';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
 import { fetchComments, fetchPostById, submitComment } from '../utils/api.ts';
+import { useAuth } from '../context/AuthContext';
 
 type CommentEntry = {
   id: string;
@@ -58,10 +59,11 @@ const defaultPost = {
 };
 
 function mapBackendComment(comment: any): CommentEntry {
+  const authorName = comment.author?.name || comment.author || 'Reader';
   return {
     id: String(comment.id),
-    author: comment.author || 'Reader',
-    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author || 'Reader')}&background=e0e7ff&color=3730a3&size=128`,
+    author: authorName,
+    avatar: comment.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=e0e7ff&color=3730a3&size=128`,
     body: comment.content || comment.body || '',
     timeLabel: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Just now',
   };
@@ -76,12 +78,13 @@ function resolveArticle(articleId: string | undefined): BlogArticle | undefined 
 
 export function PostPage() {
   const { articleId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { toggleSave, isSaved } = useSavedPosts();
   const article = useMemo(() => resolveArticle(articleId), [articleId]);
   const [postData, setPostData] = useState<any>(null);
-  const [comments, setComments] = useState<CommentEntry[]>(initialComments);
+  const [comments, setComments] = useState<CommentEntry[]>([]);
   const [showCommentForm, setShowCommentForm] = useState(false);
-  const [commentName, setCommentName] = useState('');
   const [commentBody, setCommentBody] = useState('');
   const [error, setError] = useState('');
 
@@ -102,9 +105,11 @@ export function PostPage() {
         const commentData = await fetchComments(articleId);
         if (Array.isArray(commentData)) {
           setComments(commentData.map(mapBackendComment));
+        } else {
+          setComments(initialComments);
         }
       } catch {
-        // Ignore comment load failures and keep fallback comments.
+        setComments(initialComments);
       }
     };
 
@@ -122,7 +127,7 @@ export function PostPage() {
         title: postData.title || 'Untitled post',
         author: postData.author?.name || 'Anonymous',
         authorMeta: `${(postData.tags?.[0] as string) || 'Technology'} · ${postData.createdAt ? new Date(postData.createdAt).toLocaleDateString() : 'No date'}`,
-        authorAvatar: postData.coverPhoto || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+        authorAvatar: postData.author?.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
         heroImage: postData.coverPhoto || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80',
         heroCaption: excerpt,
         paragraphs: postData.content
@@ -161,22 +166,33 @@ export function PostPage() {
 
   const handlePostComment = async (e: FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
     const body = commentBody.trim();
     if (!body || !articleId) return;
-    const author = commentName.trim() || 'Reader';
 
     try {
       const newComment = await submitComment({
         postId: Number(articleId),
-        author,
+        author: user.name,
         content: body,
       });
       setComments((prev) => [mapBackendComment(newComment), ...prev]);
       setCommentBody('');
-      setCommentName('');
       setShowCommentForm(false);
     } catch (err) {
       setError((err as Error).message || 'Unable to post your comment.');
+    }
+  };
+
+  const handleCommentButtonClick = () => {
+    if (!user) {
+      navigate('/login');
+    } else {
+      setShowCommentForm((open) => !open);
     }
   };
 
@@ -261,7 +277,7 @@ export function PostPage() {
               <h2 className="text-lg font-semibold text-gray-900">Readers Comments ({comments.length})</h2>
               <button
                 type="button"
-                onClick={() => setShowCommentForm((open) => !open)}
+                onClick={handleCommentButtonClick}
                 className="rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500"
               >
                 {showCommentForm ? 'Close' : 'Post a comment'}
@@ -274,16 +290,6 @@ export function PostPage() {
                 className="mb-6 rounded-md border border-indigo-100 bg-indigo-50/40 p-4 md:p-5"
               >
                 <p className="mb-3 text-sm font-medium text-gray-900">Add your comment</p>
-                <label className="block">
-                  <span className="sr-only">Your name</span>
-                  <input
-                    type="text"
-                    value={commentName}
-                    onChange={(e) => setCommentName(e.target.value)}
-                    placeholder="Your name (optional)"
-                    className="mb-3 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-indigo-500/30 placeholder:text-gray-400 focus:ring-2"
-                  />
-                </label>
                 <label className="block">
                   <span className="sr-only">Comment</span>
                   <textarea
@@ -307,7 +313,6 @@ export function PostPage() {
                     onClick={() => {
                       setShowCommentForm(false);
                       setCommentBody('');
-                      setCommentName('');
                     }}
                     className="rounded-md border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
                   >
@@ -375,3 +380,4 @@ export function PostPage() {
     </PageLayout>
   );
 }
+

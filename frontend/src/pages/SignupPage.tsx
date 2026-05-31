@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../AuthLayout';
-import { registerUser, saveAuthToken } from '../utils/api.ts';
+import { registerUser } from '../utils/api.ts';
+import { useAuth } from '../context/AuthContext';
 
 export function SignupPage() {
   const [name, setName] = useState('');
@@ -9,6 +10,7 @@ export function SignupPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -16,10 +18,12 @@ export function SignupPage() {
 
     try {
       const data = await registerUser({ name, email, password });
-      if (data?.token) {
-        saveAuthToken(data.token);
+      if (data?.token && data?.user) {
+        login(data.token, data.user);
+        navigate('/');
+      } else {
+        throw new Error('Invalid response from server');
       }
-      navigate('/');
     } catch (err) {
       setError((err as Error).message || 'Signup failed.');
     }

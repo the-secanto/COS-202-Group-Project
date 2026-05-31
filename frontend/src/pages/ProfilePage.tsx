@@ -137,7 +137,9 @@ function ProfileFooter() {
 
 export function ProfilePage() {
   const { authorName } = useParams();
-  const currentAuthorName = authorName ? decodeURIComponent(authorName) : 'Elena Vance';
+  const { user: authUser } = useAuth();
+  const currentAuthorName = authorName ? decodeURIComponent(authorName) : (authUser?.name || 'Elena Vance');
+  const isOwnProfile = authUser?.name === currentAuthorName;
   const { savedIds } = useSavedPosts();
 
   const [tab, setTab] = useState<ProfileTab>('published');
@@ -339,22 +341,26 @@ export function ProfilePage() {
                   <>
                     <div className="flex flex-wrap items-center gap-3">
                       <h1 className="font-serif text-3xl font-semibold tracking-tight text-[#111] sm:text-4xl">{profileData.name}</h1>
-                      <button
-                        type="button"
-                        className="rounded-md bg-violet-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-violet-500"
-                      >
-                        Follow
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsEditing(true)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 transition hover:border-gray-400 hover:bg-gray-50"
-                        aria-label="Edit Profile"
-                      >
-                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-                          <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                        </svg>
-                      </button>
+                      {!isOwnProfile && (
+                        <button
+                          type="button"
+                          className="rounded-md bg-violet-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+                        >
+                          Follow
+                        </button>
+                      )}
+                      {isOwnProfile && (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(true)}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 transition hover:border-gray-400 hover:bg-gray-50"
+                          aria-label="Edit Profile"
+                        >
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                     <p className="mt-4 text-[15px] leading-relaxed text-gray-600">
                       {profileData.bio}
