@@ -1,7 +1,0 @@
-DATABASE_URL=
-NODE_ENV=
-JWT_SECRET=
-JWT_EXPIRES_IN=
-MAIL_PASS=re_xxxxxxxxxxxxxx
-
-CLIENT_URL=http://localhost:5173

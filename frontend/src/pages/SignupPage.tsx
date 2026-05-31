@@ -27,7 +27,7 @@ export function SignupPage() {
 
   return (
     <AuthLayout>
-      <h1 className="text-2xl font-semibold text-gray-900">Join Muse</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">Join Musk</h1>
       <p className="mt-2 text-sm text-gray-500">
         Create an account to start sharing your thoughts.
       </p>

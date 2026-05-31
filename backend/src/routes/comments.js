@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createComment,
   getComments,
@@ -7,27 +6,24 @@ import {
   likeComment,
   unlikeComment
 } from "../controllers/commentsController.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Get comments for a post (public)
+router.get("/:postId", getComments);
+
+// All other routes require authentication
+router.use(authMiddleware);
 
 // Create comment
 router.post("/", createComment);
 
-
-// Get comments for a post
-router.get("/:postId", getComments);
-
-
 // Delete comment
 router.delete("/:commentId", deleteComment);
 
-
-// Like comment
+// Like/Unlike comment
 router.post("/:commentId/like", likeComment);
-
-
-// Unlike comment
 router.post("/:commentId/unlike", unlikeComment);
 
 export default router;

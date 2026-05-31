@@ -28,7 +28,7 @@ export function LoginPage() {
     <AuthLayout>
       <h1 className="text-2xl font-semibold text-gray-900">Welcome Back</h1>
       <p className="mt-2 text-sm text-gray-500">
-        Enter your credentials to access Muse.
+        Enter your credentials to access Musk.
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-5">

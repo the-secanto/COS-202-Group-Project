@@ -111,11 +111,11 @@ function ProfileFooter() {
     <footer className="border-t border-gray-100 p-6 md:p-10 pt-10">
       <div className="flex flex-col justify-between gap-8 text-sm text-gray-500 md:flex-row md:items-end">
         <div>
-          <p className="text-base font-semibold tracking-wide text-[#111]">MUSE</p>
+          <p className="text-base font-semibold tracking-wide text-[#111]">MUSK</p>
           <p className="mt-2 max-w-sm text-xs leading-relaxed text-gray-500">
             Crafting stories and ideas for the modern reader. Discover high-quality articles across inspiring themes.
           </p>
-          <p className="mt-4 text-xs text-gray-400">© 2026 MUSE. All rights reserved.</p>
+          <p className="mt-4 text-xs text-gray-400">© 2026 MUSK. All rights reserved.</p>
         </div>
         <div className="grid grid-cols-2 gap-10 text-xs">
           <div className="space-y-2">
