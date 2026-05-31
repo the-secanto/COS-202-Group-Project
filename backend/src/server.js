@@ -1,4 +1,5 @@
 import express, { urlencoded } from 'express';
+<<<<<<< HEAD
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
@@ -9,28 +10,45 @@ import commentsRoutes from './routes/comments.js';
 import profileRoute from './routes/profileRoute.js';
 import followRoutes from './routes/followRoutes.js';
 import lostPassRoutes from './routes/lostPass.js';
+=======
+import { config } from 'dotenv'
+import { connectDB, disconnectDB } from './config/db.js'
+import authRoutes from './routes/authRoutes.js'
+import posts_routes from './routes/posts_routes.js'
+import commentsRoutes from "./routes/comments.js";
+import profileRoute from "./routes/profileRoute.js"
+import lostPass from "./routes/lostPass.js"
+import cookieParser from 'cookie-parser'
+>>>>>>> 6ca55ad730ced2401d11a5a12b0abc5a0ecb9a51
 
 const app = express();
 
-config();
-connectDB();
+const app = express()
+app.use(cookieParser())
+app.use(express.json())
+app.use(urlencoded({ extended: true }))
+config()
+connectDB()
 
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-}));
-app.use(cookieParser());
-app.use(express.json());
-app.use(urlencoded({ extended: true }));
+//to be changed
+app.use('/posts', posts_routes)
+app.use('/auth', authRoutes)
+app.use("/comments", commentsRoutes);
+app.use("/profile", profileRoute);
+app.use("/lostPass", lostPass)
+//
 
+<<<<<<< HEAD
 app.use('/posts', posts_routes);
 app.use('/auth', authRoutes);
 app.use('/auth', lostPassRoutes);
 app.use('/comments', commentsRoutes);
 app.use('/users', followRoutes);
 app.use('/', profileRoute);
+=======
+>>>>>>> 6ca55ad730ced2401d11a5a12b0abc5a0ecb9a51
 
-const PORT = 5001;
+const PORT = 5001
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
