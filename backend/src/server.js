@@ -6,9 +6,11 @@ import posts_routes from './routes/posts_routes.js'
 import commentsRoutes from "./routes/comments.js";
 import profileRoute from "./routes/profileRoute.js"
 import lostPass from "./routes/lostPass.js"
+import cookieParser from 'cookie-parser'
 
 
 const app = express()
+app.use(cookieParser())
 app.use(express.json())
 app.use(urlencoded({ extended: true }))
 config()

@@ -4,7 +4,7 @@ import { prisma } from '../config/db.js'
 export const authMiddleware = async (req, res, next) => {
     let token
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        token = req.headers.authorization.split(' ')[1]
+        token = req.headers.authorization.split(" ")[1]
     } else if (req.cookies.token) {
         token = req.cookies.token
     }
@@ -18,7 +18,7 @@ export const authMiddleware = async (req, res, next) => {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: decoded.id
+                id: decoded.payload.id
             }
         })
         if (!user) {
