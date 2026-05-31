@@ -6,7 +6,7 @@ const createPostSchema = z.object({
     content: z.string().optional(),
     published: z.boolean().optional(),
     coverPhoto: z.string().url().optional(),
-    tags: z.array(z.enum(['Technology', 'Lifestyle', 'Startup', 'Finance'])).optional()
+    tags: z.array(z.enum(['Technology', 'Lifestyle', 'Startup', 'Finance']))
 })
 
 export { createPostSchema }
