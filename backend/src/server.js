@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes.js'
 import posts_routes from './routes/posts_routes.js'
 import commentsRoutes from "./routes/comments.js";
 import profileRoute from "./routes/profileRoute.js"
+import lostPass from "./routes/lostPass.js"
 
 
 const app = express()
@@ -18,6 +19,7 @@ app.use('/posts', posts_routes)
 app.use('/auth', authRoutes)
 app.use("/comments", commentsRoutes);
 app.use("/profile", profileRoute);
+app.use("/lostPass", lostPass)
 //
 
 
