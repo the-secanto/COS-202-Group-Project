@@ -2,15 +2,15 @@ import { prisma } from '../config/db.js'
 
 export const getProfile = async (req, res) => {
     const { id } = req.params
-    const userId = parseInt(id)
+    const parsedId = parseInt(id, 10)
 
-    if (isNaN(userId)) {
-        return res.status(400).json({ error: "Invalid user ID." })
-    }
+    const where = Number.isNaN(parsedId)
+        ? { name: id }
+        : { id: parsedId }
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
+        const user = await prisma.user.findFirst({
+            where,
             select: {
                 name: true,
                 avatar: true,
@@ -23,13 +23,13 @@ export const getProfile = async (req, res) => {
                 },
                 posts: {
                     where: { published: true },
-                    orderBy: { createdAt: "desc" },
+                    orderBy: { id: 'desc' },
                 },
             },
         })
 
         if (!user) {
-            return res.status(404).json({ error: "User not found." })
+            return res.status(404).json({ error: 'User not found.' })
         }
 
         return res.status(200).json({
@@ -41,7 +41,7 @@ export const getProfile = async (req, res) => {
             posts: user.posts,
         })
     } catch (error) {
-        console.error("Error fetching profile:", error)
-        return res.status(500).json({ error: "Internal server error." })
+        console.error('Error fetching profile:', error)
+        return res.status(500).json({ error: 'Internal server error.' })
     }
 };

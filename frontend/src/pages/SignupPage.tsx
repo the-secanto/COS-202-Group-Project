@@ -1,20 +1,33 @@
-import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
-import { AuthLayout } from "../AuthLayout";
+import { useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthLayout } from '../AuthLayout';
+import { registerUser, saveAuthToken } from '../utils/api.ts';
 
 export function SignupPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // UI only
+    setError('');
+
+    try {
+      const data = await registerUser({ name, email, password });
+      if (data?.token) {
+        saveAuthToken(data.token);
+      }
+      navigate('/');
+    } catch (err) {
+      setError((err as Error).message || 'Signup failed.');
+    }
   };
 
   return (
     <AuthLayout>
-      <h1 className="text-2xl font-semibold text-gray-900">Join Muse</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">Join Musk</h1>
       <p className="mt-2 text-sm text-gray-500">
         Create an account to start sharing your thoughts.
       </p>
@@ -65,17 +78,18 @@ export function SignupPage() {
           />
         </div>
 
-        <button 
-          type="submit" 
+        {error && <div className="text-sm text-red-600">{error}</div>}
+
+        <button
+          type="submit"
           className="w-full h-12 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-colors shadow-sm"
         >
           Create Account
         </button>
       </form>
 
-
       <p className="mt-8 text-center text-sm text-gray-500">
-        Already have an account?{" "}
+        Already have an account?{' '}
         <Link to="/login" className="text-indigo-600 font-semibold hover:underline">
           Sign in
         </Link>

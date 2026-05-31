@@ -8,6 +8,7 @@ import profileRoute from "./routes/profileRoute.js"
 import lostPass from "./routes/lostPass.js"
 import cookieParser from 'cookie-parser'
 
+const app = express();
 
 const app = express()
 app.use(cookieParser())
@@ -27,8 +28,34 @@ app.use("/lostPass", lostPass)
 
 const PORT = 5001
 const server = app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-})
+  console.log(`Server is running on port ${PORT}`);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+  server.close(async () => {
+    await disconnectDB();
+    process.exit(1);
+  });
+});
+
+process.on('uncaughtException', async (err) => {
+  console.error('Uncaught Exception:', err);
+  await disconnectDB();
+  process.exit(1);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  server.close(async () => {
+    await disconnectDB();
+    console.log('Server closed, exiting process.');
+    process.exit(0);
+  });
+});
+
+//openssl rand -base64 32 for jwt secret key
+
 
 process.on("unhandledRejection", (err) => {
     console.error("Unhandled Rejection:", err)

@@ -23,12 +23,12 @@ export function Footer() {
 
       <section className="flex flex-col justify-between gap-6 text-sm text-gray-500 md:flex-row md:items-end">
         <div>
-          <h3 className="mb-2 text-base font-semibold text-gray-900">MUSE</h3>
+          <h3 className="mb-2 text-base font-semibold text-gray-900">MUSK</h3>
           <p className="max-w-sm text-xs leading-5 text-gray-500">
             Crafting stories and ideas for the modern reader. Discover high-quality articles
             across inspiring themes.
           </p>
-          <p className="mt-4 text-xs text-gray-400">© 2026 MUSE. All rights reserved.</p>
+          <p className="mt-4 text-xs text-gray-400">© 2026 MUSK. All rights reserved.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-8 text-xs">

@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { articles } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
@@ -6,6 +6,7 @@ import { Footer } from './Footer.tsx';
 import { Navbar } from './Navbar.tsx';
 import { PageLayout } from './PageLayout.tsx';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
+import { fetchComments, fetchPostById, submitComment } from '../utils/api.ts';
 
 type CommentEntry = {
   id: string;
@@ -56,6 +57,16 @@ const defaultPost = {
   quoteIndex: 2,
 };
 
+function mapBackendComment(comment: any): CommentEntry {
+  return {
+    id: String(comment.id),
+    author: comment.author || 'Reader',
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author || 'Reader')}&background=e0e7ff&color=3730a3&size=128`,
+    body: comment.content || comment.body || '',
+    timeLabel: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Just now',
+  };
+}
+
 function resolveArticle(articleId: string | undefined): BlogArticle | undefined {
   if (articleId === undefined || articleId === '') return undefined;
   const n = Number.parseInt(articleId, 10);
@@ -67,13 +78,69 @@ export function PostPage() {
   const { articleId } = useParams();
   const { toggleSave, isSaved } = useSavedPosts();
   const article = useMemo(() => resolveArticle(articleId), [articleId]);
+  const [postData, setPostData] = useState<any>(null);
+  const [comments, setComments] = useState<CommentEntry[]>(initialComments);
+  const [showCommentForm, setShowCommentForm] = useState(false);
+  const [commentName, setCommentName] = useState('');
+  const [commentBody, setCommentBody] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadPost = async () => {
+      if (!articleId) return;
+      try {
+        const result = await fetchPostById(articleId);
+        setPostData(result);
+      } catch (err) {
+        setError((err as Error).message || 'Unable to load the story.');
+      }
+    };
+
+    const loadComments = async () => {
+      if (!articleId) return;
+      try {
+        const commentData = await fetchComments(articleId);
+        if (Array.isArray(commentData)) {
+          setComments(commentData.map(mapBackendComment));
+        }
+      } catch {
+        // Ignore comment load failures and keep fallback comments.
+      }
+    };
+
+    loadPost();
+    loadComments();
+  }, [articleId]);
 
   const saved = article ? isSaved(article.id) : false;
 
   const post = useMemo(() => {
+    if (postData) {
+      const excerpt = postData.content ? String(postData.content).slice(0, 120) : '';
+      return {
+        eyebrow: `${(postData.tags?.[0] as string) || 'Technology'} · ${postData.content ? `${Math.max(1, Math.ceil(String(postData.content).length / 250))} min read` : '1 min read'}`,
+        title: postData.title || 'Untitled post',
+        author: postData.author?.name || 'Anonymous',
+        authorMeta: `${(postData.tags?.[0] as string) || 'Technology'} · ${postData.createdAt ? new Date(postData.createdAt).toLocaleDateString() : 'No date'}`,
+        authorAvatar: postData.coverPhoto || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+        heroImage: postData.coverPhoto || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80',
+        heroCaption: excerpt,
+        paragraphs: postData.content
+          ? [
+              String(postData.content),
+              'Modern software often asks for constant attention, but thoughtful design asks for restraint. The less your tools demand from you, the more your work can demand from you.',
+              'Simplicity is not the absence of choice; it is the presence of enough.',
+              'The architecture of focus is built from small decisions repeated daily. Fewer tabs. Clearer files. More complete thoughts.',
+            ]
+          : defaultPost.paragraphs,
+        quoteIndex: 2,
+      };
+    }
+
     if (!article) {
       return defaultPost;
     }
+
     return {
       eyebrow: `${article.category} · ${article.readTime}`,
       title: article.title,
@@ -90,29 +157,27 @@ export function PostPage() {
       ],
       quoteIndex: 2,
     };
-  }, [article]);
+  }, [article, postData]);
 
-  const [comments, setComments] = useState<CommentEntry[]>(initialComments);
-  const [showCommentForm, setShowCommentForm] = useState(false);
-  const [commentName, setCommentName] = useState('');
-  const [commentBody, setCommentBody] = useState('');
-
-  const handlePostComment = (e: FormEvent) => {
+  const handlePostComment = async (e: FormEvent) => {
     e.preventDefault();
     const body = commentBody.trim();
-    if (!body) return;
+    if (!body || !articleId) return;
     const author = commentName.trim() || 'Reader';
-    const newComment: CommentEntry = {
-      id: `c-${Date.now()}`,
-      author,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(author)}&background=e0e7ff&color=3730a3&size=128`,
-      body,
-      timeLabel: 'Just now',
-    };
-    setComments((prev) => [newComment, ...prev]);
-    setCommentBody('');
-    setCommentName('');
-    setShowCommentForm(false);
+
+    try {
+      const newComment = await submitComment({
+        postId: Number(articleId),
+        author,
+        content: body,
+      });
+      setComments((prev) => [mapBackendComment(newComment), ...prev]);
+      setCommentBody('');
+      setCommentName('');
+      setShowCommentForm(false);
+    } catch (err) {
+      setError((err as Error).message || 'Unable to post your comment.');
+    }
   };
 
   return (

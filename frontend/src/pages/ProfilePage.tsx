@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Navbar } from '../components/Navbar.tsx';
 import { PageLayout } from '../components/PageLayout.tsx';
 import { articles } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
+import { fetchProfile } from '../utils/api.ts';
 
 const topics = [
 // ... (rest of topics)
@@ -110,11 +111,11 @@ function ProfileFooter() {
     <footer className="border-t border-gray-100 p-6 md:p-10 pt-10">
       <div className="flex flex-col justify-between gap-8 text-sm text-gray-500 md:flex-row md:items-end">
         <div>
-          <p className="text-base font-semibold tracking-wide text-[#111]">MUSE</p>
+          <p className="text-base font-semibold tracking-wide text-[#111]">MUSK</p>
           <p className="mt-2 max-w-sm text-xs leading-relaxed text-gray-500">
             Crafting stories and ideas for the modern reader. Discover high-quality articles across inspiring themes.
           </p>
-          <p className="mt-4 text-xs text-gray-400">© 2026 MUSE. All rights reserved.</p>
+          <p className="mt-4 text-xs text-gray-400">© 2026 MUSK. All rights reserved.</p>
         </div>
         <div className="grid grid-cols-2 gap-10 text-xs">
           <div className="space-y-2">
@@ -141,7 +142,7 @@ export function ProfilePage() {
 
   const [tab, setTab] = useState<ProfileTab>('published');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  
+
   // Profile editing state
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -149,33 +150,69 @@ export function ProfilePage() {
     bio: 'Creative Director & Design Philosopher. Exploring the intersection of digital ethics, minimalist aesthetics, and the future of human-computer interaction. Currently archiving thoughts on Lumina.',
     location: 'San Francisco',
     website: currentAuthorName.toLowerCase().replace(/\s+/g, '') + '.design',
-    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentAuthorName)}&background=8b5cf6&color=fff&size=200`
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentAuthorName)}&background=8b5cf6&color=fff&size=200`,
   });
+  const [profileCounts, setProfileCounts] = useState({ stories: 0, followers: 0, following: 0 });
+  const [authorArticles, setAuthorArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState('');
 
-  // Demo: update profile data if URL authorName changes
-  useMemo(() => {
-    setProfileData(prev => ({
-      ...prev,
-      name: currentAuthorName,
-      website: currentAuthorName.toLowerCase().replace(/\s+/g, '') + '.design',
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentAuthorName)}&background=8b5cf6&color=fff&size=200`
-    }));
+  const [savedArticles, setSavedArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      setProfileLoading(true);
+      setProfileError('');
+
+      try {
+        const profile = await fetchProfile(currentAuthorName);
+        setProfileData((prev) => ({
+          ...prev,
+          name: profile.name || currentAuthorName,
+          avatar: profile.avatar || prev.avatar,
+        }));
+        setProfileCounts({
+          stories: profile.stories ?? 0,
+          followers: profile.followers ?? 0,
+          following: profile.following ?? 0,
+        });
+
+        if (Array.isArray(profile.posts)) {
+          setAuthorArticles(
+            profile.posts.map((post: any, index: number) => ({
+              article: {
+                id: post.id,
+                title: post.title || 'Untitled post',
+                excerpt: post.content ? String(post.content).slice(0, 120) + '…' : 'No excerpt available.',
+                category: Array.isArray(post.tags) && post.tags.length > 0 ? post.tags[0] : 'Technology',
+                author: profile.name || currentAuthorName,
+                readTime: post.content ? `${Math.max(1, Math.ceil(String(post.content).length / 250))} min read` : '1 min read',
+                image: post.coverPhoto || 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+              },
+              date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][index % 4] ?? 'Jan 1, 2026',
+            })),
+          );
+        }
+      } catch (err) {
+        setProfileError((err as Error).message || 'Unable to load profile');
+        setAuthorArticles([]);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    loadProfile();
   }, [currentAuthorName]);
 
-  const authorArticles = useMemo(() => {
-    return articles.filter(a => a.author === currentAuthorName).map((article, i) => ({
-      article,
-      date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][i % 4] ?? 'Jan 1, 2026',
-    }));
-  }, [currentAuthorName]);
-
-  const savedArticles = useMemo(() => {
-    return articles
-      .filter((a) => savedIds.includes(a.id))
-      .map((article, i) => ({
-        article,
-        date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][i % 4] ?? 'Jan 1, 2026',
-      }));
+  useEffect(() => {
+    setSavedArticles(
+      articles
+        .filter((a) => savedIds.includes(a.id))
+        .map((article, i) => ({
+          article,
+          date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][i % 4] ?? 'Jan 1, 2026',
+        })),
+    );
   }, [savedIds]);
 
   const filteredFeed = authorArticles.filter(({ article }) => {
@@ -354,15 +391,15 @@ export function ProfilePage() {
 
             <div className="mt-10 grid grid-cols-3 gap-6 border-t border-gray-100 pt-8 sm:max-w-md">
               <div>
-                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">{authorArticles.length > 0 ? authorArticles.length : 42}</p>
+                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">{profileCounts.stories}</p>
                 <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Stories</p>
               </div>
               <div>
-                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">12.8k</p>
+                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">{profileCounts.followers}</p>
                 <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Followers</p>
               </div>
               <div>
-                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">156</p>
+                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">{profileCounts.following}</p>
                 <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Following</p>
               </div>
             </div>

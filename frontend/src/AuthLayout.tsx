@@ -29,7 +29,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               "Writing is the only way I have to explain things to myself."
             </p>
             <Link to="/" className="mt-3 block text-xs font-semibold tracking-[0.2em] text-indigo-200 no-underline hover:text-white transition-colors">
-              MUSE EDITORIAL
+              MUSK EDITORIAL
             </Link>
           </div>
           <div className="relative z-10" />

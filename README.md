@@ -1,7 +1,7 @@
 # **COS-202-Group-Project**
 
  
-# The Muse
+# The Musk
 ## Group 4 Blog Platform
 
 ## 📌Description
