@@ -71,6 +71,18 @@ export const submitComment = (body: { postId: number; author: string; content: s
     body: JSON.stringify(body),
   });
 
+export const followUser = (followingId: number) =>
+  request('/users/follow', {
+    method: 'POST',
+    body: JSON.stringify({ followingId }),
+  });
+
+export const unfollowUser = (followingId: number) =>
+  request('/users/unfollow', {
+    method: 'POST',
+    body: JSON.stringify({ followingId }),
+  });
+
 export const logoutUser = () =>
   request('/auth/logout', {
     method: 'POST',
