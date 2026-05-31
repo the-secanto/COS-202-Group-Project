@@ -4,4 +4,4 @@ JWT_SECRET=
 JWT_EXPIRES_IN=
 MAIL_PASS=re_xxxxxxxxxxxxxx
 
-CLIENT_URL=http://localhost:5001
+CLIENT_URL=http://localhost:5173

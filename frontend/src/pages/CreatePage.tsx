@@ -2,11 +2,42 @@ import { useState } from 'react';
 import { Navbar } from '../components/Navbar.tsx';
 import { Footer } from '../components/Footer.tsx';
 import { PageLayout } from '../components/PageLayout.tsx';
+import { createPost } from '../utils/api.ts';
 
 export function CreatePage() {
   const [visibility, setVisibility] = useState<'Draft' | 'Publish'>('Draft');
-
   const [selectedCategory, setSelectedCategory] = useState<string>('Lifestyle');
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [status, setStatus] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handlePublish = async () => {
+    setStatus('');
+
+    if (!title.trim() || !body.trim()) {
+      setStatus('Please provide a title and body before publishing.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await createPost({
+        title: title.trim(),
+        content: body.trim(),
+        published: visibility === 'Publish',
+        tags: selectedCategory ? [selectedCategory] : ['Lifestyle'],
+        coverPhoto: '',
+      });
+      setStatus('Your post was created successfully.');
+      setTitle('');
+      setBody('');
+    } catch (error) {
+      setStatus((error as Error).message || 'Unable to create post.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSelectTag = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
@@ -34,6 +65,8 @@ export function CreatePage() {
           <input
             type="text"
             placeholder="Post Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             className="mb-8 w-full border-none text-2xl font-medium text-gray-800 outline-none placeholder:text-gray-300"
           />
 
@@ -43,6 +76,8 @@ export function CreatePage() {
 
           <textarea
             placeholder="Start your story..."
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
             className="h-[480px] w-full resize-none border-none text-sm leading-7 text-gray-700 outline-none placeholder:text-gray-300"
           />
         </div>
@@ -143,10 +178,14 @@ export function CreatePage() {
 
           <button
             type="button"
-            className="mt-10 w-full rounded-md border border-red-200 py-2 text-sm font-medium text-red-500 hover:bg-red-50"
+            onClick={handlePublish}
+            disabled={isSubmitting}
+            className="mt-10 w-full rounded-md border border-indigo-600 bg-indigo-600 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
           >
-            Move to Trash
+            {visibility === 'Publish' ? 'Publish Post' : 'Save as Draft'}
           </button>
+
+          {status && <p className="mt-4 text-sm text-gray-700">{status}</p>}
 
         </aside>
       </section>
