@@ -2,7 +2,8 @@ import { prisma } from '../config/db.js'
 
 // 1. CREATE a new post
 export const createPost = async (req, res) => {
-    const { title, content, published } = req.body;
+    const { title, content } = req.body;
+    const published = req.body.published === 'true' || req.body.published === true || false;
 
     // Adjust 'req.user.userId' if your DB field name inside the user model is different (e.g., req.user.id)
     const userId = req.user.id;
