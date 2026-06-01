@@ -123,7 +123,7 @@ export function PostPage() {
   const articleId = params.articleId;
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toggleSave, isSaved } = useSavedPosts();
+  const { isSaved } = useSavedPosts();
   const article = useMemo(() => resolveArticle(articleId), [articleId]);
   
   // Explicitly reference these to satisfy TS6198
@@ -136,7 +136,6 @@ export function PostPage() {
   const [commentBody, setCommentBody] = useState('');
   const [replyingTo, setReplyingTo] = useState<{ id: number; name: string } | null>(null);
   const [actionMessage, setActionMessage] = useState('');
-  const [error, setError] = useState('');
   const [likesCount, setLikesCount] = useState(0);
   const [isPostSaved, setIsPostSaved] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
