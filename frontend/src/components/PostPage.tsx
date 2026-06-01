@@ -136,12 +136,12 @@ export function PostPage() {
   const [commentBody, setCommentBody] = useState('');
   const [replyingTo, setReplyingTo] = useState<{ id: number; name: string } | null>(null);
   const [actionMessage, setActionMessage] = useState('');
-  const [error, setError] = useState('');
   const [likesCount, setLikesCount] = useState(0);
   const [isPostSaved, setIsPostSaved] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isPublishingComment, setIsPublishingComment] = useState(false);
   const [isLoadingPost, setIsLoadingPost] = useState(true);
+
   const loadComments = async () => {
     if (!articleId) return;
     try {
@@ -149,8 +149,8 @@ export function PostPage() {
       if (Array.isArray(commentData)) {
         setComments(commentData.map(mapBackendComment));
       }
-    } catch {
-      // Ignore errors
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -272,7 +272,7 @@ export function PostPage() {
       setReplyingTo(null);
       setShowCommentForm(false);
     } catch (err) {
-      setError((err as Error).message || 'Unable to post your comment.');
+      console.error('Unable to post comment:', err);
     } finally {
       setIsPublishingComment(false);
     }
