@@ -6,11 +6,12 @@ import { Footer } from './Footer.tsx';
 import { Navbar } from './Navbar.tsx';
 import { PageLayout } from './PageLayout.tsx';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
-import { fetchComments, fetchPostById, submitComment, likePost, unlikePost, savePost, unsavePost, deleteComment } from '../utils/api.ts';
+import { fetchComments, fetchPostById, submitComment, likePost, unlikePost, savePost, unsavePost, deleteComment, deletePost } from '../utils/api.ts';
 import { useAuth } from '../context/AuthContext';
 
 type CommentEntry = {
-  id: number;
+// ... (rest of type)
+
   author: string;
   avatar: string;
   body: string;

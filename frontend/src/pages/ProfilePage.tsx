@@ -211,14 +211,12 @@ export function ProfilePage() {
       await updateProfile({
         location: profileData.location,
         avatar: profileData.avatar,
-        // bio and website currently not in schema but could be added later
       });
       setIsEditing(false);
     } catch (err) {
       console.error('Failed to update profile:', err);
-      setProfileError('Failed to save changes.');
     } finally {
-      setIsSaving(false);
+      setIsEditingSaving(false);
     }
   };
 
