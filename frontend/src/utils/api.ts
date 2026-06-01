@@ -2,15 +2,15 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5001';
 
 const getToken = () => localStorage.getItem('authToken');
 
-const buildHeaders = (customHeaders: HeadersInit = {}) => {
+const buildHeaders = (customHeaders: HeadersInit = {}): Record<string, string> => {
   const token = getToken();
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...customHeaders,
+    ...(customHeaders as Record<string, string>),
   };
 
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
   return headers;

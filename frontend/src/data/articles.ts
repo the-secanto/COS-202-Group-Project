@@ -6,6 +6,7 @@ export type BlogArticle = {
   author: string;
   readTime: string;
   image: string;
+  published?: boolean;
 };
 
 export const categories = [
@@ -26,6 +27,7 @@ export const articles: BlogArticle[] = [
     readTime: '5 min read',
     image:
       'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+    published: true,
   },
   {
     id: 2,
@@ -36,6 +38,7 @@ export const articles: BlogArticle[] = [
     readTime: '6 min read',
     image:
       'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80',
+    published: true,
   },
   {
     id: 3,
@@ -46,6 +49,7 @@ export const articles: BlogArticle[] = [
     readTime: '4 min read',
     image:
       'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80',
+    published: true,
   },
   {
     id: 4,
@@ -56,6 +60,7 @@ export const articles: BlogArticle[] = [
     readTime: '10 min read',
     image:
       'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1200&q=80',
+    published: true,
   },
   {
     id: 5,
@@ -66,6 +71,7 @@ export const articles: BlogArticle[] = [
     readTime: '9 min read',
     image:
       'https://images.unsplash.com/photo-1516110833967-0b5716ca1387?auto=format&fit=crop&w=1200&q=80',
+    published: true,
   },
   {
     id: 6,
@@ -76,6 +82,7 @@ export const articles: BlogArticle[] = [
     readTime: '7 min read',
     image:
       'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+    published: true,
   },
   {
     id: 7,
@@ -86,6 +93,7 @@ export const articles: BlogArticle[] = [
     readTime: '3 min read',
     image:
       'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=1200&q=80',
+    published: true,
   },
   {
     id: 8,
@@ -96,5 +104,6 @@ export const articles: BlogArticle[] = [
     readTime: '8 min read',
     image:
       'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80',
+    published: true,
   },
 ];

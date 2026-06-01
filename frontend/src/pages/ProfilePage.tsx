@@ -228,7 +228,7 @@ export function ProfilePage() {
       setProfileError('');
 
       try {
-        const profile = await fetchProfile(currentAuthorName);
+        const profile: any = await fetchProfile(currentAuthorName);
         setProfileId(profile.id);
         setIsFollowing(profile.isFollowing);
         setProfileData((prev) => ({
@@ -244,7 +244,7 @@ export function ProfilePage() {
 
         if (Array.isArray(profile.posts)) {
           setAuthorArticles(
-            profile.posts.map((post: any, index: number) => ({
+            profile.posts.map((post: any) => ({
               article: {
                 id: post.id,
                 title: post.title || 'Untitled post',

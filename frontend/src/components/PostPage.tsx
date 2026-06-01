@@ -129,7 +129,6 @@ export function PostPage() {
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [commentBody, setCommentBody] = useState('');
   const [replyingTo, setReplyingTo] = useState<{ id: number; name: string } | null>(null);
-  const [error, setError] = useState('');
   const [actionMessage, setActionMessage] = useState('');
   const [likesCount, setLikesCount] = useState(0);
   const [isPostSaved, setIsPostSaved] = useState(false);
@@ -158,7 +157,7 @@ export function PostPage() {
         setPostData(result);
         setLikesCount(result._count?.likes || 0);
       } catch (err) {
-        setError((err as Error).message || 'Unable to load the story.');
+        console.error('Failed to load story:', err);
       } finally {
         setIsLoadingPost(false);
       }
@@ -177,7 +176,7 @@ export function PostPage() {
       setActionMessage('Comment deleted');
       setTimeout(() => setActionMessage(''), 3000);
     } catch (err) {
-      setError((err as Error).message || 'Unable to delete comment.');
+      console.error('Unable to delete comment:', err);
     }
   };
 
@@ -188,7 +187,7 @@ export function PostPage() {
       await deletePost(Number(articleId));
       navigate('/');
     } catch (err) {
-      setError((err as Error).message || 'Unable to delete story.');
+      console.error('Unable to delete story:', err);
     }
   };
 
