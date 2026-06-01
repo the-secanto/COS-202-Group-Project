@@ -4,15 +4,20 @@ import generateTokens from "../../utils/generateTokens.js"
 
 
 const register = async (req, res) => {
-
     const { email, name, password } = req.body
+
+    // Simple email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Please enter a valid email address." });
+    }
 
     const userExists = await prisma.User.findUnique({
         where: { email: email }
     })
 
     if (userExists) {
-        return res.status(400).json({ message: "User already exists" })
+        return res.status(400).json({ message: "An account with this email already exists. Please log in or use a different email." })
     }
 
     const salt = await bcrypt.genSalt(10)
@@ -40,18 +45,24 @@ const login = async (req, res) => {
 
     const { email, password } = req.body
 
+    // Simple email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Please enter a valid email address." });
+    }
+
     const user = await prisma.User.findUnique({
         where: { email: email }
     })
 
     if (!user) {
-        return res.status(400).json({ message: "Invalid email or password" })
+        return res.status(400).json({ message: "No account found with this email." })
     }
 
     const isMatch = await bcrypt.compare(password, user.password)
 
     if (!isMatch) {
-        return res.status(400).json({ message: "Invalid credentials" })
+        return res.status(400).json({ message: "Incorrect password. Please try again." })
     }
 
     const token = generateTokens(user.id, res)
