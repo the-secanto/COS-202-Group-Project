@@ -4,6 +4,15 @@ import { Footer } from '../components/Footer.tsx';
 import { PageLayout } from '../components/PageLayout.tsx';
 import { createPost } from '../utils/api.ts';
 
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 export function CreatePage() {
   const [visibility, setVisibility] = useState<'Draft' | 'Publish'>('Draft');
   const [selectedCategory, setSelectedCategory] = useState<string>('Lifestyle');
@@ -11,6 +20,19 @@ export function CreatePage() {
   const [body, setBody] = useState('');
   const [status, setStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coverPhoto, setCoverPhoto] = useState('');
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const base64 = await fileToBase64(file);
+        setCoverPhoto(base64);
+      } catch (err) {
+        console.error('File conversion failed:', err);
+      }
+    }
+  };
 
   const handlePublish = async () => {
     setStatus('');
@@ -27,11 +49,12 @@ export function CreatePage() {
         content: body.trim(),
         published: visibility === 'Publish',
         tags: selectedCategory ? [selectedCategory] : ['Lifestyle'],
-        coverPhoto: '',
+        coverPhoto: coverPhoto,
       });
       setStatus('Your post was created successfully.');
       setTitle('');
       setBody('');
+      setCoverPhoto('');
     } catch (error) {
       setStatus((error as Error).message || 'Unable to create post.');
     } finally {
@@ -93,9 +116,26 @@ export function CreatePage() {
               Cover image
             </p>
 
-            <div className="flex h-28 items-center justify-center rounded-md border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-400">
-              Upload cover
-            </div>
+            <label className="flex h-28 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-400 hover:bg-gray-100">
+              {coverPhoto ? (
+                <img src={coverPhoto} alt="Cover preview" className="h-full w-full object-cover" />
+              ) : (
+                <>
+                  <svg className="mb-2 h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  <span>Upload cover</span>
+                </>
+              )}
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+            </label>
           </div>
 
           <div className="mb-6">

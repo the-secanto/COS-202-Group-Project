@@ -5,8 +5,17 @@ import { PageLayout } from '../components/PageLayout.tsx';
 import { articles } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
-import { fetchProfile, followUser, unfollowUser } from '../utils/api.ts';
+import { fetchProfile, followUser, unfollowUser, updateProfile } from '../utils/api.ts';
 import { useAuth } from '../context/AuthContext';
+
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 const topics = [
 // ... (rest of topics)
@@ -164,6 +173,36 @@ export function ProfilePage() {
   const [profileError, setProfileError] = useState('');
 
   const [savedArticles, setSavedArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
+  const [isSaving, setIsEditingSaving] = useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const base64 = await fileToBase64(file);
+        setProfileData((prev) => ({ ...prev, avatar: base64 }));
+      } catch (err) {
+        console.error('File conversion failed:', err);
+      }
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    setIsEditingSaving(true);
+    try {
+      await updateProfile({
+        location: profileData.location,
+        avatar: profileData.avatar,
+        // bio and website currently not in schema but could be added later
+      });
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      setProfileError('Failed to save changes.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -305,16 +344,18 @@ export function ProfilePage() {
                   className="h-full w-full rounded-xl object-cover"
                 />
                 {isEditing && (
-                  <button 
-                    type="button"
-                    className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label="Change photo"
-                  >
+                  <label className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                       <circle cx="12" cy="13" r="4" />
                     </svg>
-                  </button>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                    />
+                  </label>
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -350,10 +391,11 @@ export function ProfilePage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => setIsEditing(false)}
-                        className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-500"
+                        onClick={handleSaveChanges}
+                        disabled={isSaving}
+                        className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:opacity-50"
                       >
-                        Save Changes
+                        {isSaving ? 'Saving...' : 'Save Changes'}
                       </button>
                       <button
                         type="button"

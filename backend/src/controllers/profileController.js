@@ -1,6 +1,30 @@
 import { prisma } from '../config/db.js'
 import jwt from 'jsonwebtoken'
 
+export const updateProfile = async (req, res) => {
+    const userId = req.user.id;
+    const { bio, location, website, avatar } = req.body;
+
+    try {
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
+                location,
+                avatar // This will be the Base64 string
+            }
+        });
+
+        // Note: Currently bio and website aren't in the schema, 
+        // I should probably add them or handle them differently.
+        // For now let's just update what we can.
+
+        return res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
 export const getProfile = async (req, res) => {
     const { id } = req.params
     const decodedId = decodeURIComponent(id)

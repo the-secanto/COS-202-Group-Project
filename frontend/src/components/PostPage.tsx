@@ -361,13 +361,22 @@ export function PostPage() {
               <button
                 type="button"
                 onClick={handleLike}
-                className={`rounded-md border px-3.5 py-2 text-xs font-medium transition md:text-sm ${
+                className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition-all duration-200 md:text-sm ${
                   isLiked && user
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                    : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:text-gray-900'
+                    ? 'border-pink-200 bg-pink-50 text-pink-600 shadow-sm shadow-pink-100'
+                    : 'border-gray-200 text-gray-600 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-600'
                 }`}
               >
-                Likes ({likesCount})
+                <svg 
+                  className={`h-4 w-4 transition-transform duration-200 ${isLiked && user ? 'scale-110 fill-current' : ''}`} 
+                  viewBox="0 0 24 24" 
+                  fill={isLiked && user ? "currentColor" : "none"} 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                </svg>
+                <span className="tabular-nums">{likesCount}</span>
               </button>
               <button
                 type="button"

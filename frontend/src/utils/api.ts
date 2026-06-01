@@ -64,6 +64,11 @@ export const createPost = (body: {
 export const fetchFeed = () => request('/posts/fyp');
 export const fetchPostById = (id: string | number) => request(`/posts/${id}`);
 export const fetchProfile = (idOrName: string | number) => request(`/profile/${encodeURIComponent(String(idOrName))}`);
+export const updateProfile = (body: { bio?: string; location?: string; website?: string; avatar?: string }) =>
+  request('/profile', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
 export const fetchComments = (postId: string | number) => request(`/comments/${postId}`);
 export const submitComment = (body: { postId: number; content: string; parentId?: number }) =>
   request('/comments', {
