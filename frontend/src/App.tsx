@@ -21,7 +21,14 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/profile/:authorName?" element={<ProfilePage />} />
+      <Route
+        path="/profile/:authorName?"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
     </Routes>

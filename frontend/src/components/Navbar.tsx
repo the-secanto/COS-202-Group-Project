@@ -49,11 +49,14 @@ export function Navbar() {
           </Link>
         ) : (
           <Link
-            to="/profile/Elena%20Vance"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600 no-underline transition hover:bg-gray-300"
-            aria-label="Profile"
+            to="/login"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-400 no-underline transition hover:bg-gray-200"
+            aria-label="Login to view profile"
           >
-            U
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
           </Link>
         )}
       </div>

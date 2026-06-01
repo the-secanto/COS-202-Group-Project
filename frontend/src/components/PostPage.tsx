@@ -240,10 +240,15 @@ export function PostPage() {
     };
   }, [article, postData, isLoadingPost]);
 
+  const showLoginPrompt = (action: string) => {
+    setActionMessage(`Please login/signup to ${action} this story.`);
+    setTimeout(() => setActionMessage(''), 3000);
+  };
+
   const handlePostComment = async (e: FormEvent) => {
     e.preventDefault();
     if (!user) {
-      navigate('/login');
+      showLoginPrompt('post a comment');
       return;
     }
 
