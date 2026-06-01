@@ -190,7 +190,7 @@ export function ProfilePage() {
   const [profileLoading, setProfileLoading] = useState(true);
 
   const [savedArticles, setSavedArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
-  const [isSaving, setIsEditingSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -205,7 +205,7 @@ export function ProfilePage() {
   };
 
   const handleSaveChanges = async () => {
-    setIsEditingSaving(true);
+    setIsSaving(true);
     try {
       await updateProfile({
         location: profileData.location,
@@ -215,14 +215,13 @@ export function ProfilePage() {
     } catch (err) {
       console.error('Failed to update profile:', err);
     } finally {
-      setIsEditingSaving(false);
+      setIsSaving(false);
     }
   };
 
   useEffect(() => {
     const loadProfile = async () => {
       setProfileLoading(true);
-      setProfileError('');
 
       try {
         const profile: any = await fetchProfile(currentAuthorName);
