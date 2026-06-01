@@ -1,43 +1,98 @@
-import { type FormEvent, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { articles } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
 import { Footer } from './Footer.tsx';
 import { Navbar } from './Navbar.tsx';
 import { PageLayout } from './PageLayout.tsx';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
+import { fetchComments, fetchPostById, submitComment, likePost, unlikePost, savePost, unsavePost, deleteComment } from '../utils/api.ts';
+import { useAuth } from '../context/AuthContext';
 
 type CommentEntry = {
-  id: string;
+  id: number;
   author: string;
   avatar: string;
   body: string;
   timeLabel: string;
+  replies: CommentEntry[];
+  likesCount: number;
+  authorId: number;
 };
 
-const initialComments: CommentEntry[] = [
-  {
-    id: 'c1',
-    author: 'Emma J.',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80',
-    body: 'This perspective helped me rethink my entire setup. Fewer tools really do reduce friction and improve the quality of focused work.',
-    timeLabel: '2 hours ago',
-  },
-  {
-    id: 'c2',
-    author: 'Julien V.',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
-    body: 'I started a no-notification workday after reading this. The difference in concentration is huge, especially for long-form writing sessions.',
-    timeLabel: '6 hours ago',
-  },
-  {
-    id: 'c3',
-    author: 'Noah K.',
-    avatar: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=120&q=80',
-    body: 'Great read. Minimal computing feels less like a trend and more like a practical design philosophy for modern creators.',
-    timeLabel: '1 day ago',
-  },
-];
+function CommentItem({ 
+  comment, 
+  onReply,
+  onDelete
+}: { 
+  comment: CommentEntry; 
+  onReply: (parentId: number, authorName: string) => void;
+  onDelete: (commentId: number) => void;
+}) {
+  const { user } = useAuth();
+  const isAuthor = user?.id === comment.authorId;
+
+  return (
+    <div className="space-y-4">
+      <article className="rounded-md border border-gray-100 bg-[#fcfcfd] p-4">
+        <div className="flex items-start gap-3">
+          <img src={comment.avatar} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-gray-900">{comment.author}</p>
+                <span className="text-xs text-gray-400">{comment.timeLabel}</span>
+              </div>
+              {isAuthor && (
+                <button 
+                  type="button" 
+                  onClick={() => onDelete(comment.id)}
+                  className="text-[10px] font-bold uppercase tracking-wider text-red-400 transition hover:text-red-600"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+            <p className="mt-2 text-sm leading-6 text-gray-600">{comment.body}</p>
+            <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+              <button type="button" className="transition hover:text-gray-800">
+                Like ({comment.likesCount})
+              </button>
+              <button 
+                type="button" 
+                onClick={() => onReply(comment.id, comment.author)}
+                className="transition hover:text-gray-800"
+              >
+                Reply
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+      {comment.replies.length > 0 && (
+        <div className="ml-6 space-y-4 border-l-2 border-gray-50 pl-4">
+          {comment.replies.map((reply) => (
+            <CommentItem key={reply.id} comment={reply} onReply={onReply} onDelete={onDelete} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function mapBackendComment(comment: any): CommentEntry {
+  const authorName = comment.author?.name || comment.author || 'Reader';
+  return {
+    id: comment.id,
+    author: authorName,
+    avatar: comment.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=e0e7ff&color=3730a3&size=128`,
+    body: comment.content || comment.body || '',
+    timeLabel: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Just now',
+    likesCount: comment.likesCount || 0,
+    replies: Array.isArray(comment.replies) ? comment.replies.map(mapBackendComment) : [],
+    authorId: comment.authorId,
+  };
+}
 
 const defaultPost = {
   eyebrow: 'Technology · 6 min read',
@@ -65,15 +120,108 @@ function resolveArticle(articleId: string | undefined): BlogArticle | undefined 
 
 export function PostPage() {
   const { articleId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { toggleSave, isSaved } = useSavedPosts();
   const article = useMemo(() => resolveArticle(articleId), [articleId]);
+  const [postData, setPostData] = useState<any>(null);
+  const [comments, setComments] = useState<CommentEntry[]>([]);
+  const [showCommentForm, setShowCommentForm] = useState(false);
+  const [commentBody, setCommentBody] = useState('');
+  const [replyingTo, setReplyingTo] = useState<{ id: number; name: string } | null>(null);
+  const [error, setError] = useState('');
+  const [actionMessage, setActionMessage] = useState('');
+  const [likesCount, setLikesCount] = useState(0);
+  const [isPostSaved, setIsPostSaved] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isPublishingComment, setIsPublishingComment] = useState(false);
+  const [isLoadingPost, setIsLoadingPost] = useState(true);
 
-  const saved = article ? isSaved(article.id) : false;
+  const loadComments = async () => {
+    if (!articleId) return;
+    try {
+      const commentData = await fetchComments(articleId);
+      if (Array.isArray(commentData)) {
+        setComments(commentData.map(mapBackendComment));
+      }
+    } catch {
+      // Ignore errors
+    }
+  };
+
+  useEffect(() => {
+    const loadPost = async () => {
+      if (!articleId) return;
+      setIsLoadingPost(true);
+      try {
+        const result = await fetchPostById(articleId);
+        setPostData(result);
+        setLikesCount(result._count?.likes || 0);
+      } catch (err) {
+        setError((err as Error).message || 'Unable to load the story.');
+      } finally {
+        setIsLoadingPost(false);
+      }
+    };
+
+    loadPost();
+    loadComments();
+  }, [articleId]);
+
+  const handleDeleteComment = async (commentId: number) => {
+    if (!window.confirm('Are you sure you want to delete this comment?')) return;
+
+    try {
+      await deleteComment(commentId);
+      await loadComments();
+      setActionMessage('Comment deleted');
+      setTimeout(() => setActionMessage(''), 3000);
+    } catch (err) {
+      setError((err as Error).message || 'Unable to delete comment.');
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!window.confirm('Are you sure you want to delete this story? This action cannot be undone.')) return;
+
+    try {
+      await deletePost(Number(articleId));
+      navigate('/');
+    } catch (err) {
+      setError((err as Error).message || 'Unable to delete story.');
+    }
+  };
 
   const post = useMemo(() => {
+    if (isLoadingPost) {
+        return defaultPost;
+    }
+    if (postData) {
+      const excerpt = postData.content ? String(postData.content).slice(0, 120) : '';
+      return {
+        eyebrow: `${(postData.tags?.[0] as string) || 'Technology'} · ${postData.content ? `${Math.max(1, Math.ceil(String(postData.content).length / 250))} min read` : '1 min read'}`,
+        title: postData.title || 'Untitled post',
+        author: postData.author?.name || 'Anonymous',
+        authorMeta: `${(postData.tags?.[0] as string) || 'Technology'} · ${postData.createdAt ? new Date(postData.createdAt).toLocaleDateString() : 'No date'}`,
+        authorAvatar: postData.author?.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+        heroImage: postData.coverPhoto || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80',
+        heroCaption: excerpt,
+        paragraphs: postData.content
+          ? [
+              String(postData.content),
+              'Modern software often asks for constant attention, but thoughtful design asks for restraint. The less your tools demand from you, the more your work can demand from you.',
+              'Simplicity is not the absence of choice; it is the presence of enough.',
+              'The architecture of focus is built from small decisions repeated daily. Fewer tabs. Clearer files. More complete thoughts.',
+            ]
+          : defaultPost.paragraphs,
+        quoteIndex: 2,
+      };
+    }
+
     if (!article) {
       return defaultPost;
     }
+
     return {
       eyebrow: `${article.category} · ${article.readTime}`,
       title: article.title,
@@ -90,36 +238,130 @@ export function PostPage() {
       ],
       quoteIndex: 2,
     };
-  }, [article]);
+  }, [article, postData, isLoadingPost]);
 
-  const [comments, setComments] = useState<CommentEntry[]>(initialComments);
-  const [showCommentForm, setShowCommentForm] = useState(false);
-  const [commentName, setCommentName] = useState('');
-  const [commentBody, setCommentBody] = useState('');
+  const showLoginPrompt = (action: string) => {
+    setActionMessage(`Please login/signup to ${action} this story.`);
+    setTimeout(() => setActionMessage(''), 3000);
+  };
 
-  const handlePostComment = (e: FormEvent) => {
+  const handlePostComment = async (e: FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      showLoginPrompt('post a comment');
+      return;
+    }
+
     const body = commentBody.trim();
-    if (!body) return;
-    const author = commentName.trim() || 'Reader';
-    const newComment: CommentEntry = {
-      id: `c-${Date.now()}`,
-      author,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(author)}&background=e0e7ff&color=3730a3&size=128`,
-      body,
-      timeLabel: 'Just now',
-    };
-    setComments((prev) => [newComment, ...prev]);
-    setCommentBody('');
-    setCommentName('');
-    setShowCommentForm(false);
+    if (!body || !articleId) return;
+
+    setIsPublishingComment(true);
+    try {
+      await submitComment({
+        postId: Number(articleId),
+        content: body,
+        parentId: replyingTo?.id || undefined,
+      });
+      await loadComments();
+      setCommentBody('');
+      setReplyingTo(null);
+      setShowCommentForm(false);
+    } catch (err) {
+      setError((err as Error).message || 'Unable to post your comment.');
+    } finally {
+      setIsPublishingComment(false);
+    }
+  };
+
+  const handleReply = (parentId: number, authorName: string) => {
+    if (!user) {
+      showLoginPrompt('reply to');
+      return;
+    }
+    setReplyingTo({ id: parentId, name: authorName });
+    setShowCommentForm(true);
+  };
+
+  const handleCommentButtonClick = () => {
+    if (!user) {
+      showLoginPrompt('comment on');
+    } else {
+      setReplyingTo(null);
+      setShowCommentForm((open) => !open);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!user) {
+      showLoginPrompt('like');
+      return;
+    }
+
+    if (!articleId) return;
+
+    try {
+      if (isLiked) {
+        const result = await unlikePost(Number(articleId));
+        setLikesCount(result.likes);
+        setIsLiked(false);
+      } else {
+        const result = await likePost(Number(articleId));
+        setLikesCount(result.likes);
+        setIsLiked(true);
+      }
+    } catch (err) {
+      console.error('Error toggling like:', err);
+    }
+  };
+
+  const handleShare = () => {
+    if (!user) {
+      showLoginPrompt('share');
+    } else {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        setActionMessage('Link copied to clipboard!');
+        setTimeout(() => setActionMessage(''), 3000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) {
+      showLoginPrompt('save');
+      return;
+    }
+
+    if (!articleId) return;
+
+    try {
+      if (isPostSaved) {
+        await unsavePost(Number(articleId));
+        setIsPostSaved(false);
+        setActionMessage('Post removed from saves');
+      } else {
+        await savePost(Number(articleId));
+        setIsPostSaved(true);
+        setActionMessage('Post saved successfully!');
+      }
+      setTimeout(() => setActionMessage(''), 3000);
+    } catch (err) {
+      console.error('Error toggling save:', err);
+    }
   };
 
   return (
     <PageLayout>
         <Navbar />
 
-        <article className="mx-auto max-w-2xl">
+        <article className="mx-auto max-w-2xl relative">
+          {actionMessage && (
+            <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 rounded-full bg-indigo-600 px-6 py-2 text-sm font-semibold text-white shadow-lg animate-bounce">
+              {actionMessage}
+            </div>
+          )}
+
           <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400">{post.eyebrow}</p>
 
           <h1 className="text-2xl font-semibold leading-tight text-gray-900 md:text-[2rem]">{post.title}</h1>
@@ -165,27 +407,49 @@ export function PostPage() {
             <div className="flex flex-wrap items-center gap-2.5">
               <button
                 type="button"
-                className="rounded-md border border-gray-200 px-3.5 py-2 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 md:text-sm"
+                onClick={handleLike}
+                className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition-all duration-200 md:text-sm ${
+                  isLiked && user
+                    ? 'border-pink-200 bg-pink-50 text-pink-600 shadow-sm shadow-pink-100'
+                    : 'border-gray-200 text-gray-600 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-600'
+                }`}
               >
-                Likes (408)
+                <svg 
+                  className={`h-4 w-4 transition-transform duration-200 ${isLiked && user ? 'scale-110 fill-current' : ''}`} 
+                  viewBox="0 0 24 24" 
+                  fill={isLiked && user ? "currentColor" : "none"} 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                </svg>
+                <span className="tabular-nums">{likesCount}</span>
               </button>
               <button
                 type="button"
+                onClick={handleShare}
                 className="rounded-md border border-gray-200 px-3.5 py-2 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 md:text-sm"
               >
                 Share
               </button>
-              {article && (
+              <button
+                type="button"
+                onClick={handleSave}
+                className={`rounded-md border px-3.5 py-2 text-xs font-medium transition md:text-sm ${
+                  isPostSaved && user
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
+                    : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:text-gray-900'
+                }`}
+              >
+                {isPostSaved && user ? 'Saved' : 'Save'}
+              </button>
+              {user && postData && user.id === postData.authorId && (
                 <button
                   type="button"
-                  onClick={() => toggleSave(article.id)}
-                  className={`rounded-md border px-3.5 py-2 text-xs font-medium transition md:text-sm ${
-                    saved
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                      : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:text-gray-900'
-                  }`}
+                  onClick={handleDeletePost}
+                  className="rounded-md border border-red-100 bg-red-50 px-3.5 py-2 text-xs font-medium text-red-600 transition hover:border-red-200 hover:bg-red-100 md:text-sm"
                 >
-                  {saved ? 'Saved' : 'Save'}
+                  Delete Story
                 </button>
               )}
             </div>
@@ -193,10 +457,10 @@ export function PostPage() {
 
           <section className="mt-10">
             <div className="mb-5 flex items-center justify-between gap-4">
-              <h2 className="text-lg font-semibold text-gray-900">Readers Comments ({comments.length})</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Readers Comments</h2>
               <button
                 type="button"
-                onClick={() => setShowCommentForm((open) => !open)}
+                onClick={handleCommentButtonClick}
                 className="rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500"
               >
                 {showCommentForm ? 'Close' : 'Post a comment'}
@@ -208,17 +472,9 @@ export function PostPage() {
                 onSubmit={handlePostComment}
                 className="mb-6 rounded-md border border-indigo-100 bg-indigo-50/40 p-4 md:p-5"
               >
-                <p className="mb-3 text-sm font-medium text-gray-900">Add your comment</p>
-                <label className="block">
-                  <span className="sr-only">Your name</span>
-                  <input
-                    type="text"
-                    value={commentName}
-                    onChange={(e) => setCommentName(e.target.value)}
-                    placeholder="Your name (optional)"
-                    className="mb-3 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-indigo-500/30 placeholder:text-gray-400 focus:ring-2"
-                  />
-                </label>
+                <p className="mb-3 text-sm font-medium text-gray-900">
+                  {replyingTo ? `Reply to ${replyingTo.name}` : 'Add your comment'}
+                </p>
                 <label className="block">
                   <span className="sr-only">Comment</span>
                   <textarea
@@ -233,16 +489,27 @@ export function PostPage() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button
                     type="submit"
-                    className="rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500"
+                    disabled={isPublishingComment}
+                    className="rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Publish comment
+                    {isPublishingComment ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="h-3 w-3 animate-spin text-white" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Publishing...
+                      </span>
+                    ) : (
+                      replyingTo ? 'Post Reply' : 'Publish comment'
+                    )}
                   </button>
                   <button
                     type="button"
                     onClick={() => {
                       setShowCommentForm(false);
                       setCommentBody('');
-                      setCommentName('');
+                      setReplyingTo(null);
                     }}
                     className="rounded-md border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
                   >
@@ -252,29 +519,14 @@ export function PostPage() {
               </form>
             )}
 
-            <div className="space-y-4 border-t border-gray-100 pt-6">
-              {comments.map((c) => (
-                <article key={c.id} className="rounded-md border border-gray-100 bg-[#fcfcfd] p-4">
-                  <div className="flex items-start gap-3">
-                    <img src={c.avatar} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <p className="text-sm font-semibold text-gray-900">{c.author}</p>
-                        <span className="text-xs text-gray-400">{c.timeLabel}</span>
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-gray-600">{c.body}</p>
-                      <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-                        <button type="button" className="transition hover:text-gray-800">
-                          Like
-                        </button>
-                        <button type="button" className="transition hover:text-gray-800">
-                          Reply
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              ))}
+            <div className="space-y-6 border-t border-gray-100 pt-6">
+              {comments.length > 0 ? (
+                comments.map((c) => (
+                  <CommentItem key={c.id} comment={c} onReply={handleReply} onDelete={handleDeleteComment} />
+                ))
+              ) : (
+                <p className="py-10 text-center text-sm text-gray-500">No comments yet. Be the first to share your thoughts!</p>
+              )}
             </div>
           </section>
 

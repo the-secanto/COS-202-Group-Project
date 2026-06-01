@@ -13,40 +13,84 @@ datasource db {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  email            String    @unique
+  id               Int           @id @default(autoincrement())
+  email            String        @unique
   name             String?
   password         String
   posts            Post[]
-  createdAt        DateTime  @default(now())
+  location         String?
+  createdAt        DateTime      @default(now())
   comments         Comment[]
   avatar           String? // URL e.g. "https://cdn.example.com/avatar.jpg"
   resetToken       String? // For password reset functionality
   resetTokenExpiry DateTime?
-  following        Follow[]  @relation("following")
-  followers        Follow[]  @relation("followers")
+  following        Follow[]      @relation("following")
+  followers        Follow[]      @relation("followers")
+  commentLikes     CommentLike[]
+  postLikes        PostLike[]
+  savedPosts       SavedPost[]
 }
 
 model Post {
-  id         Int       @id @default(autoincrement())
+  id         Int         @id @default(autoincrement())
   title      String
   content    String?
-  published  Boolean   @default(false)
+  published  Boolean     @default(false)
   authorId   Int
-  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author     User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
   comments   Comment[]
   tags       Tag[]
   coverPhoto String? // URL e.g. "https://cdn.example.com/image.jpg"
+  likes      PostLike[]
+  savedBy    SavedPost[]
+  createdAt  DateTime    @default(now())
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   content   String
   postId    Int
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
   authorId  Int
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentId  Int?
+  parent    Comment?      @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[]     @relation("CommentToComment")
+  likes     CommentLike[]
+  createdAt DateTime      @default(now())
+}
+
+model PostLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commentId Int
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, commentId])
+}
+
+model SavedPost {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
 }
 
 model Follow {

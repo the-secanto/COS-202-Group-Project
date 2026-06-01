@@ -1,20 +1,24 @@
 import express from 'express'
-import { deletePost, createPost, updatePost, getFeed } from '../controllers/posts_Controllers.js'
+import { deletePost, createPost, updatePost, getFeed, getPostById, likePost, unlikePost, savePost, unsavePost, getSavedPosts } from '../controllers/posts_Controllers.js'
 import { authMiddleware } from '../middleware/authMiddleware.js'
-import { register, login, logout } from '../controllers/authControllers.js'
 import { validateRequest } from '../middleware/validateRequests.js'
 import { createPostSchema } from '../validators/postValidators.js'
 
 const router = express.Router()
-router.use(authMiddleware)
 
 router.get('/fyp', getFeed)
+router.get('/saved', authMiddleware, getSavedPosts)
+router.get('/:id', getPostById)
+
+router.use(authMiddleware)
 router.post('/create', validateRequest(createPostSchema), createPost)
-router.delete('/:id', deletePost)
 router.put('/:id', updatePost)
+router.delete('/:id', deletePost)
 
-//router.post('/login', login)
-
-//router.post('/logout', logout)
+// Post interactions
+router.post('/:id/like', likePost)
+router.delete('/:id/like', unlikePost)
+router.post('/:id/save', savePost)
+router.delete('/:id/save', unsavePost)
 
 export default router

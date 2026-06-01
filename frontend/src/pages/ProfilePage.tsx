@@ -1,10 +1,21 @@
-import { useState, useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar.tsx';
 import { PageLayout } from '../components/PageLayout.tsx';
 import { articles } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
+import { fetchProfile, followUser, unfollowUser, updateProfile, deletePost } from '../utils/api.ts';
+import { useAuth } from '../context/AuthContext';
+
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 const topics = [
 // ... (rest of topics)
@@ -50,7 +61,15 @@ const topics = [
 
 type ProfileTab = 'published' | 'saved' | 'drafts';
 
-function ProfileStoryRow({ article, date }: { article: BlogArticle; date: string }) {
+function ProfileStoryRow({ 
+  article, 
+  date,
+  onDelete
+}: { 
+  article: BlogArticle; 
+  date: string;
+  onDelete?: (id: number) => void;
+}) {
   const { toggleSave, isSaved } = useSavedPosts();
   const saved = isSaved(article.id);
 
@@ -81,6 +100,16 @@ function ProfileStoryRow({ article, date }: { article: BlogArticle; date: string
             </svg>
           </button>
 
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(article.id)}
+              className="text-[10px] font-bold uppercase tracking-wider text-red-400 transition hover:text-red-600"
+            >
+              Delete Post
+            </button>
+          )}
+
           <button
             type="button"
             className="rounded p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
@@ -110,11 +139,11 @@ function ProfileFooter() {
     <footer className="border-t border-gray-100 p-6 md:p-10 pt-10">
       <div className="flex flex-col justify-between gap-8 text-sm text-gray-500 md:flex-row md:items-end">
         <div>
-          <p className="text-base font-semibold tracking-wide text-[#111]">MUSE</p>
+          <p className="text-base font-semibold tracking-wide text-[#111]">MUSK</p>
           <p className="mt-2 max-w-sm text-xs leading-relaxed text-gray-500">
             Crafting stories and ideas for the modern reader. Discover high-quality articles across inspiring themes.
           </p>
-          <p className="mt-4 text-xs text-gray-400">© 2026 MUSE. All rights reserved.</p>
+          <p className="mt-4 text-xs text-gray-400">© 2026 MUSK. All rights reserved.</p>
         </div>
         <div className="grid grid-cols-2 gap-10 text-xs">
           <div className="space-y-2">
@@ -136,54 +165,181 @@ function ProfileFooter() {
 
 export function ProfilePage() {
   const { authorName } = useParams();
-  const currentAuthorName = authorName ? decodeURIComponent(authorName) : 'Elena Vance';
+  const navigate = useNavigate();
+  const { user: authUser } = useAuth();
+  const currentAuthorName = authorName ? decodeURIComponent(authorName) : (authUser?.name || 'Elena Vance');
+  const isOwnProfile = authUser?.name === currentAuthorName;
   const { savedIds } = useSavedPosts();
 
   const [tab, setTab] = useState<ProfileTab>('published');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  
+
   // Profile editing state
   const [isEditing, setIsEditing] = useState(false);
+  const [profileId, setProfileId] = useState<number | null>(null);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: currentAuthorName,
     bio: 'Creative Director & Design Philosopher. Exploring the intersection of digital ethics, minimalist aesthetics, and the future of human-computer interaction. Currently archiving thoughts on Lumina.',
     location: 'San Francisco',
     website: currentAuthorName.toLowerCase().replace(/\s+/g, '') + '.design',
-    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentAuthorName)}&background=8b5cf6&color=fff&size=200`
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentAuthorName)}&background=8b5cf6&color=fff&size=200`,
   });
+  const [profileCounts, setProfileCounts] = useState({ stories: 0, followers: 0, following: 0 });
+  const [authorArticles, setAuthorArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState('');
 
-  // Demo: update profile data if URL authorName changes
-  useMemo(() => {
-    setProfileData(prev => ({
-      ...prev,
-      name: currentAuthorName,
-      website: currentAuthorName.toLowerCase().replace(/\s+/g, '') + '.design',
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentAuthorName)}&background=8b5cf6&color=fff&size=200`
-    }));
+  const [savedArticles, setSavedArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
+  const [isSaving, setIsEditingSaving] = useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const base64 = await fileToBase64(file);
+        setProfileData((prev) => ({ ...prev, avatar: base64 }));
+      } catch (err) {
+        console.error('File conversion failed:', err);
+      }
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    setIsEditingSaving(true);
+    try {
+      await updateProfile({
+        location: profileData.location,
+        avatar: profileData.avatar,
+        // bio and website currently not in schema but could be added later
+      });
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      setProfileError('Failed to save changes.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      setProfileLoading(true);
+      setProfileError('');
+
+      try {
+        const profile = await fetchProfile(currentAuthorName);
+        setProfileId(profile.id);
+        setIsFollowing(profile.isFollowing);
+        setProfileData((prev) => ({
+          ...prev,
+          name: profile.name || currentAuthorName,
+          avatar: profile.avatar || prev.avatar,
+        }));
+        setProfileCounts({
+          stories: profile.stories ?? 0,
+          followers: profile.followers ?? 0,
+          following: profile.following ?? 0,
+        });
+
+        if (Array.isArray(profile.posts)) {
+          setAuthorArticles(
+            profile.posts.map((post: any, index: number) => ({
+              article: {
+                id: post.id,
+                title: post.title || 'Untitled post',
+                excerpt: post.content ? String(post.content).slice(0, 120) + '…' : 'No excerpt available.',
+                category: Array.isArray(post.tags) && post.tags.length > 0 ? post.tags[0] : 'Technology',
+                author: profile.name || currentAuthorName,
+                readTime: post.content ? `${Math.max(1, Math.ceil(String(post.content).length / 250))} min read` : '1 min read',
+                image: post.coverPhoto || 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+                published: post.published,
+              },
+              date: post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'Jan 1, 2026',
+            })),
+          );
+        }
+      } catch (err) {
+        setProfileError((err as Error).message || 'Unable to load profile');
+        setAuthorArticles([]);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    loadProfile();
   }, [currentAuthorName]);
 
-  const authorArticles = useMemo(() => {
-    return articles.filter(a => a.author === currentAuthorName).map((article, i) => ({
-      article,
-      date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][i % 4] ?? 'Jan 1, 2026',
-    }));
-  }, [currentAuthorName]);
+  const handleDeletePost = async (postId: number) => {
+    if (!window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) return;
 
-  const savedArticles = useMemo(() => {
-    return articles
-      .filter((a) => savedIds.includes(a.id))
-      .map((article, i) => ({
-        article,
-        date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][i % 4] ?? 'Jan 1, 2026',
-      }));
+    try {
+      await deletePost(postId);
+      // Refresh profile data to remove the post from state
+      setAuthorArticles((prev) => prev.filter((a) => a.article.id !== postId));
+      setProfileCounts((prev) => ({ ...prev, stories: prev.stories - 1 }));
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+      alert('Failed to delete post. Please try again.');
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!authUser) {
+      navigate('/login');
+      return;
+    }
+    if (!profileId) return;
+
+    try {
+      if (isFollowing) {
+        await unfollowUser(profileId);
+        setProfileCounts((prev) => ({ ...prev, followers: prev.followers - 1 }));
+      } else {
+        await followUser(profileId);
+        setProfileCounts((prev) => ({ ...prev, followers: prev.followers + 1 }));
+      }
+      setIsFollowing(!isFollowing);
+    } catch (err) {
+      console.error('Follow toggle failed:', err);
+    }
+  };
+
+  useEffect(() => {
+    setSavedArticles(
+      articles
+        .filter((a) => savedIds.includes(a.id))
+        .map((article, i) => ({
+          article,
+          date: ['Apr 14, 2026', 'Mar 22, 2026', 'Feb 8, 2026', 'Jan 15, 2026'][i % 4] ?? 'Jan 1, 2026',
+        })),
+    );
   }, [savedIds]);
 
   const filteredFeed = authorArticles.filter(({ article }) => {
+    // 1. Filter by Tab (Published vs Drafts)
+    if (tab === 'published' && !article.published) return false;
+    if (tab === 'drafts' && article.published) return false;
+    if (tab === 'saved') return false; // Handled by savedArticles
+
+    // 2. Filter by Category
     if (!selectedTopic) return true;
     const articleCat = article.category.toLowerCase().replace(/\s+/g, '');
     const selectedCat = selectedTopic.toLowerCase().replace(/\s+/g, '');
     return articleCat === selectedCat;
   });
+
+  const SkeletonRow = () => (
+    <div className="flex flex-col gap-5 border-b border-gray-100 py-8 animate-pulse">
+      <div className="flex-1">
+        <div className="h-3 w-24 bg-gray-200 rounded mb-2"></div>
+        <div className="h-6 w-3/4 bg-gray-200 rounded mb-3"></div>
+        <div className="h-3 w-full bg-gray-100 rounded mb-1"></div>
+        <div className="h-3 w-2/3 bg-gray-100 rounded"></div>
+      </div>
+      <div className="h-24 w-40 bg-gray-100 rounded-md"></div>
+    </div>
+  );
 
   return (
     <PageLayout mainClassName="flex flex-col text-[#1a1a1a]">
@@ -239,16 +395,18 @@ export function ProfilePage() {
                   className="h-full w-full rounded-xl object-cover"
                 />
                 {isEditing && (
-                  <button 
-                    type="button"
-                    className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label="Change photo"
-                  >
+                  <label className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                       <circle cx="12" cy="13" r="4" />
                     </svg>
-                  </button>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                    />
+                  </label>
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -284,10 +442,11 @@ export function ProfilePage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => setIsEditing(false)}
-                        className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-500"
+                        onClick={handleSaveChanges}
+                        disabled={isSaving}
+                        className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:opacity-50"
                       >
-                        Save Changes
+                        {isSaving ? 'Saving...' : 'Save Changes'}
                       </button>
                       <button
                         type="button"
@@ -302,22 +461,31 @@ export function ProfilePage() {
                   <>
                     <div className="flex flex-wrap items-center gap-3">
                       <h1 className="font-serif text-3xl font-semibold tracking-tight text-[#111] sm:text-4xl">{profileData.name}</h1>
-                      <button
-                        type="button"
-                        className="rounded-md bg-violet-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-violet-500"
-                      >
-                        Follow
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsEditing(true)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 transition hover:border-gray-400 hover:bg-gray-50"
-                        aria-label="Edit Profile"
-                      >
-                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-                          <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                        </svg>
-                      </button>
+                      {!isOwnProfile && (
+                        <button
+                          type="button"
+                          onClick={handleFollowToggle}
+                          className={`rounded-md px-4 py-1.5 text-sm font-semibold transition ${
+                            isFollowing 
+                              ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
+                              : 'bg-violet-600 text-white hover:bg-violet-500'
+                          }`}
+                        >
+                          {isFollowing ? 'Following' : 'Follow'}
+                        </button>
+                      )}
+                      {isOwnProfile && (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(true)}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 transition hover:border-gray-400 hover:bg-gray-50"
+                          aria-label="Edit Profile"
+                        >
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                     <p className="mt-4 text-[15px] leading-relaxed text-gray-600">
                       {profileData.bio}
@@ -354,15 +522,15 @@ export function ProfilePage() {
 
             <div className="mt-10 grid grid-cols-3 gap-6 border-t border-gray-100 pt-8 sm:max-w-md">
               <div>
-                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">{authorArticles.length > 0 ? authorArticles.length : 42}</p>
+                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">{profileCounts.stories}</p>
                 <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Stories</p>
               </div>
               <div>
-                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">12.8k</p>
+                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">{profileCounts.followers}</p>
                 <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Followers</p>
               </div>
               <div>
-                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">156</p>
+                <p className="text-2xl font-semibold tracking-tight text-[#111] sm:text-3xl">{profileCounts.following}</p>
                 <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">Following</p>
               </div>
             </div>
@@ -394,18 +562,29 @@ export function ProfilePage() {
               </div>
 
               <div className="pt-2" role="tabpanel">
-                {tab === 'published' && (
+                {profileLoading ? (
+                  <div className="space-y-4">
+                    <SkeletonRow />
+                    <SkeletonRow />
+                    <SkeletonRow />
+                  </div>
+                ) : tab === 'published' && (
                   <div>
                     {filteredFeed.length > 0 ? (
                       filteredFeed.map(({ article, date }) => (
-                        <ProfileStoryRow key={article.id} article={article} date={date} />
+                        <ProfileStoryRow 
+                          key={article.id} 
+                          article={article} 
+                          date={date} 
+                          onDelete={isOwnProfile ? handleDeletePost : undefined}
+                        />
                       ))
                     ) : (
                       <p className="py-14 text-center text-sm text-gray-500">No stories found.</p>
                     )}
                   </div>
                 )}
-                {tab === 'saved' && (
+                {!profileLoading && tab === 'saved' && (
                   <div>
                     {savedArticles.length > 0 ? (
                       savedArticles.map(({ article, date }) => (
@@ -416,8 +595,21 @@ export function ProfilePage() {
                     )}
                   </div>
                 )}
-                {tab === 'drafts' && (
-                  <p className="py-14 text-center text-sm text-gray-500">No drafts saved.</p>
+                {!profileLoading && tab === 'drafts' && (
+                  <div>
+                    {filteredFeed.length > 0 ? (
+                      filteredFeed.map(({ article, date }) => (
+                        <ProfileStoryRow 
+                          key={article.id} 
+                          article={article} 
+                          date={date} 
+                          onDelete={isOwnProfile ? handleDeletePost : undefined}
+                        />
+                      ))
+                    ) : (
+                      <p className="py-14 text-center text-sm text-gray-500">No drafts saved.</p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
