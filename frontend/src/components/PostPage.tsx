@@ -136,6 +136,7 @@ export function PostPage() {
   const [commentBody, setCommentBody] = useState('');
   const [replyingTo, setReplyingTo] = useState<{ id: number; name: string } | null>(null);
   const [actionMessage, setActionMessage] = useState('');
+  const [error, setError] = useState('');
   const [likesCount, setLikesCount] = useState(0);
   const [isPostSaved, setIsPostSaved] = useState(false);
   const [isLiked, setIsLiked] = useState(false);

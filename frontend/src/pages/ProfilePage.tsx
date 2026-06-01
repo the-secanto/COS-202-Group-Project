@@ -256,7 +256,7 @@ export function ProfilePage() {
           );
         }
       } catch (err) {
-        setProfileError((err as Error).message || 'Unable to load profile');
+        console.error('Unable to load profile:', err);
         setAuthorArticles([]);
       } finally {
         setProfileLoading(false);
