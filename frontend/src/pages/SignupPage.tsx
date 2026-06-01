@@ -16,6 +16,20 @@ export function SignupPage() {
     e.preventDefault();
     setError('');
 
+    // Basic client-side validation
+    if (!name.trim()) {
+      setError('Full name is required.');
+      return;
+    }
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+
     try {
       const data = await registerUser({ name, email, password });
       if (data?.token && data?.user) {
@@ -36,7 +50,7 @@ export function SignupPage() {
         Create an account to start sharing your thoughts.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-5">
+      <form onSubmit={onSubmit} className="mt-8 space-y-5" noValidate>
         <div className="space-y-2">
           <label htmlFor="name" className="text-xs font-medium tracking-wider text-gray-900">
             FULL NAME
@@ -48,7 +62,6 @@ export function SignupPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded-md border border-gray-200 bg-white px-3 h-11 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-            required
           />
         </div>
 
@@ -63,7 +76,6 @@ export function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-md border border-gray-200 bg-white px-3 h-11 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-            required
           />
         </div>
 
@@ -78,7 +90,6 @@ export function SignupPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-md border border-gray-200 bg-white px-3 h-11 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-            required
           />
         </div>
 

@@ -15,6 +15,16 @@ export function LoginPage() {
     e.preventDefault();
     setError('');
 
+    // Basic client-side validation
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    if (!password) {
+      setError('Password is required.');
+      return;
+    }
+
     try {
       const data = await loginUser({ email, password });
       if (data?.token && data?.user) {
@@ -35,7 +45,7 @@ export function LoginPage() {
         Enter your credentials to access Musk.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-5">
+      <form onSubmit={onSubmit} className="mt-8 space-y-5" noValidate>
         <div className="space-y-2">
           <label htmlFor="email" className="text-xs font-medium tracking-wider text-gray-900">
             EMAIL ADDRESS
@@ -47,7 +57,6 @@ export function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-md border border-gray-200 bg-white px-3 h-11 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-            required
           />
         </div>
 
@@ -64,7 +73,6 @@ export function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-md border border-gray-200 bg-white px-3 h-11 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-            required
           />
         </div>
 
