@@ -188,7 +188,6 @@ export function ProfilePage() {
   const [profileCounts, setProfileCounts] = useState({ stories: 0, followers: 0, following: 0 });
   const [authorArticles, setAuthorArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [profileError, setProfileError] = useState('');
 
   const [savedArticles, setSavedArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
   const [isSaving, setIsEditingSaving] = useState(false);

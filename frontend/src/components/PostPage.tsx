@@ -10,8 +10,7 @@ import { fetchComments, fetchPostById, submitComment, likePost, unlikePost, save
 import { useAuth } from '../context/AuthContext';
 
 type CommentEntry = {
-// ... (rest of type)
-
+  id: number;
   author: string;
   avatar: string;
   body: string;
