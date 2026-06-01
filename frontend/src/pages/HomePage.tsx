@@ -69,6 +69,16 @@ export function HomePage() {
     setVisibleCount((currentCount) => currentCount + 3);
   };
 
+  const SkeletonCard = () => (
+    <div className="flex flex-col gap-4 border border-gray-100 rounded-lg p-4 animate-pulse">
+      <div className="h-40 bg-gray-200 rounded-md"></div>
+      <div className="h-4 w-24 bg-gray-200 rounded"></div>
+      <div className="h-6 w-3/4 bg-gray-200 rounded"></div>
+      <div className="h-3 w-full bg-gray-100 rounded"></div>
+      <div className="h-3 w-2/3 bg-gray-100 rounded"></div>
+    </div>
+  );
+
   return (
     <PageLayout>
       <Navbar />
@@ -80,7 +90,12 @@ export function HomePage() {
       />
 
       {loading ? (
-        <section className="py-14 text-center text-gray-500">Loading stories…</section>
+        <div className="mx-auto mt-12 grid max-w-7xl grid-cols-1 gap-8 px-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       ) : error ? (
         <section className="py-14 text-center text-red-500">{error}</section>
       ) : (

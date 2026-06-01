@@ -235,6 +235,7 @@ export function ProfilePage() {
                 author: profile.name || currentAuthorName,
                 readTime: post.content ? `${Math.max(1, Math.ceil(String(post.content).length / 250))} min read` : '1 min read',
                 image: post.coverPhoto || 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+                published: post.published,
               },
               date: post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'Jan 1, 2026',
             })),
@@ -284,11 +285,29 @@ export function ProfilePage() {
   }, [savedIds]);
 
   const filteredFeed = authorArticles.filter(({ article }) => {
+    // 1. Filter by Tab (Published vs Drafts)
+    if (tab === 'published' && !article.published) return false;
+    if (tab === 'drafts' && article.published) return false;
+    if (tab === 'saved') return false; // Handled by savedArticles
+
+    // 2. Filter by Category
     if (!selectedTopic) return true;
     const articleCat = article.category.toLowerCase().replace(/\s+/g, '');
     const selectedCat = selectedTopic.toLowerCase().replace(/\s+/g, '');
     return articleCat === selectedCat;
   });
+
+  const SkeletonRow = () => (
+    <div className="flex flex-col gap-5 border-b border-gray-100 py-8 animate-pulse">
+      <div className="flex-1">
+        <div className="h-3 w-24 bg-gray-200 rounded mb-2"></div>
+        <div className="h-6 w-3/4 bg-gray-200 rounded mb-3"></div>
+        <div className="h-3 w-full bg-gray-100 rounded mb-1"></div>
+        <div className="h-3 w-2/3 bg-gray-100 rounded"></div>
+      </div>
+      <div className="h-24 w-40 bg-gray-100 rounded-md"></div>
+    </div>
+  );
 
   return (
     <PageLayout mainClassName="flex flex-col text-[#1a1a1a]">
@@ -511,7 +530,13 @@ export function ProfilePage() {
               </div>
 
               <div className="pt-2" role="tabpanel">
-                {tab === 'published' && (
+                {profileLoading ? (
+                  <div className="space-y-4">
+                    <SkeletonRow />
+                    <SkeletonRow />
+                    <SkeletonRow />
+                  </div>
+                ) : tab === 'published' && (
                   <div>
                     {filteredFeed.length > 0 ? (
                       filteredFeed.map(({ article, date }) => (
@@ -522,7 +547,7 @@ export function ProfilePage() {
                     )}
                   </div>
                 )}
-                {tab === 'saved' && (
+                {!profileLoading && tab === 'saved' && (
                   <div>
                     {savedArticles.length > 0 ? (
                       savedArticles.map(({ article, date }) => (
@@ -533,8 +558,16 @@ export function ProfilePage() {
                     )}
                   </div>
                 )}
-                {tab === 'drafts' && (
-                  <p className="py-14 text-center text-sm text-gray-500">No drafts saved.</p>
+                {!profileLoading && tab === 'drafts' && (
+                  <div>
+                    {filteredFeed.length > 0 ? (
+                      filteredFeed.map(({ article, date }) => (
+                        <ProfileStoryRow key={article.id} article={article} date={date} />
+                      ))
+                    ) : (
+                      <p className="py-14 text-center text-sm text-gray-500">No drafts saved.</p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

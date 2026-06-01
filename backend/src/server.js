@@ -35,7 +35,7 @@ app.use('/auth', authRoutes);
 app.use('/auth', lostPassRoutes);
 app.use('/comments', commentsRoutes);
 app.use('/users', followRoutes);
-app.use('/', profileRoute);
+app.use('/profile', profileRoute);
 
 const PORT = 5001;
 const server = app.listen(PORT, () => {

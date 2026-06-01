@@ -43,13 +43,12 @@ export const getProfile = async (req, res) => {
                 avatar: true,
                 _count: {
                     select: {
-                        posts: { where: { published: true } },
+                        posts: true,
                         followers: true,
                         following: true,
                     },
                 },
                 posts: {
-                    where: { published: true },
                     orderBy: { id: 'desc' },
                 },
             },
