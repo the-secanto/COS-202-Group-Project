@@ -5,7 +5,7 @@ import { PageLayout } from '../components/PageLayout.tsx';
 import { articles } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
-import { fetchProfile, followUser, unfollowUser, updateProfile } from '../utils/api.ts';
+import { fetchProfile, followUser, unfollowUser, updateProfile, deletePost } from '../utils/api.ts';
 import { useAuth } from '../context/AuthContext';
 
 const fileToBase64 = (file: File): Promise<string> => {
@@ -61,7 +61,15 @@ const topics = [
 
 type ProfileTab = 'published' | 'saved' | 'drafts';
 
-function ProfileStoryRow({ article, date }: { article: BlogArticle; date: string }) {
+function ProfileStoryRow({ 
+  article, 
+  date,
+  onDelete
+}: { 
+  article: BlogArticle; 
+  date: string;
+  onDelete?: (id: number) => void;
+}) {
   const { toggleSave, isSaved } = useSavedPosts();
   const saved = isSaved(article.id);
 
@@ -91,6 +99,16 @@ function ProfileStoryRow({ article, date }: { article: BlogArticle; date: string
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
             </svg>
           </button>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(article.id)}
+              className="text-[10px] font-bold uppercase tracking-wider text-red-400 transition hover:text-red-600"
+            >
+              Delete Post
+            </button>
+          )}
 
           <button
             type="button"
@@ -251,6 +269,20 @@ export function ProfilePage() {
 
     loadProfile();
   }, [currentAuthorName]);
+
+  const handleDeletePost = async (postId: number) => {
+    if (!window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) return;
+
+    try {
+      await deletePost(postId);
+      // Refresh profile data to remove the post from state
+      setAuthorArticles((prev) => prev.filter((a) => a.article.id !== postId));
+      setProfileCounts((prev) => ({ ...prev, stories: prev.stories - 1 }));
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+      alert('Failed to delete post. Please try again.');
+    }
+  };
 
   const handleFollowToggle = async () => {
     if (!authUser) {
@@ -540,7 +572,12 @@ export function ProfilePage() {
                   <div>
                     {filteredFeed.length > 0 ? (
                       filteredFeed.map(({ article, date }) => (
-                        <ProfileStoryRow key={article.id} article={article} date={date} />
+                        <ProfileStoryRow 
+                          key={article.id} 
+                          article={article} 
+                          date={date} 
+                          onDelete={isOwnProfile ? handleDeletePost : undefined}
+                        />
                       ))
                     ) : (
                       <p className="py-14 text-center text-sm text-gray-500">No stories found.</p>
@@ -562,7 +599,12 @@ export function ProfilePage() {
                   <div>
                     {filteredFeed.length > 0 ? (
                       filteredFeed.map(({ article, date }) => (
-                        <ProfileStoryRow key={article.id} article={article} date={date} />
+                        <ProfileStoryRow 
+                          key={article.id} 
+                          article={article} 
+                          date={date} 
+                          onDelete={isOwnProfile ? handleDeletePost : undefined}
+                        />
                       ))
                     ) : (
                       <p className="py-14 text-center text-sm text-gray-500">No drafts saved.</p>

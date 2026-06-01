@@ -63,6 +63,7 @@ export const createPost = (body: {
 
 export const fetchFeed = () => request('/posts/fyp');
 export const fetchPostById = (id: string | number) => request(`/posts/${id}`);
+export const deletePost = (id: number) => request(`/posts/${id}`, { method: 'DELETE' });
 export const fetchProfile = (idOrName: string | number) => request(`/profile/${encodeURIComponent(String(idOrName))}`);
 export const updateProfile = (body: { bio?: string; location?: string; website?: string; avatar?: string }) =>
   request('/profile', {
@@ -74,6 +75,11 @@ export const submitComment = (body: { postId: number; content: string; parentId?
   request('/comments', {
     method: 'POST',
     body: JSON.stringify(body),
+  });
+
+export const deleteComment = (commentId: number) =>
+  request(`/comments/${commentId}`, {
+    method: 'DELETE',
   });
 
 export const likePost = (id: number) => request(`/posts/${id}/like`, { method: 'POST' });

@@ -6,7 +6,7 @@ import { Footer } from './Footer.tsx';
 import { Navbar } from './Navbar.tsx';
 import { PageLayout } from './PageLayout.tsx';
 import { useSavedPosts } from '../hooks/useSavedPosts.ts';
-import { fetchComments, fetchPostById, submitComment, likePost, unlikePost, savePost, unsavePost } from '../utils/api.ts';
+import { fetchComments, fetchPostById, submitComment, likePost, unlikePost, savePost, unsavePost, deleteComment } from '../utils/api.ts';
 import { useAuth } from '../context/AuthContext';
 
 type CommentEntry = {
@@ -17,24 +17,41 @@ type CommentEntry = {
   timeLabel: string;
   replies: CommentEntry[];
   likesCount: number;
+  authorId: number;
 };
 
 function CommentItem({ 
   comment, 
-  onReply 
+  onReply,
+  onDelete
 }: { 
   comment: CommentEntry; 
-  onReply: (parentId: number, authorName: string) => void 
+  onReply: (parentId: number, authorName: string) => void;
+  onDelete: (commentId: number) => void;
 }) {
+  const { user } = useAuth();
+  const isAuthor = user?.id === comment.authorId;
+
   return (
     <div className="space-y-4">
       <article className="rounded-md border border-gray-100 bg-[#fcfcfd] p-4">
         <div className="flex items-start gap-3">
           <img src={comment.avatar} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <p className="text-sm font-semibold text-gray-900">{comment.author}</p>
-              <span className="text-xs text-gray-400">{comment.timeLabel}</span>
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-gray-900">{comment.author}</p>
+                <span className="text-xs text-gray-400">{comment.timeLabel}</span>
+              </div>
+              {isAuthor && (
+                <button 
+                  type="button" 
+                  onClick={() => onDelete(comment.id)}
+                  className="text-[10px] font-bold uppercase tracking-wider text-red-400 transition hover:text-red-600"
+                >
+                  Delete
+                </button>
+              )}
             </div>
             <p className="mt-2 text-sm leading-6 text-gray-600">{comment.body}</p>
             <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
@@ -55,7 +72,7 @@ function CommentItem({
       {comment.replies.length > 0 && (
         <div className="ml-6 space-y-4 border-l-2 border-gray-50 pl-4">
           {comment.replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} onReply={onReply} />
+            <CommentItem key={reply.id} comment={reply} onReply={onReply} onDelete={onDelete} />
           ))}
         </div>
       )}
@@ -73,6 +90,7 @@ function mapBackendComment(comment: any): CommentEntry {
     timeLabel: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Just now',
     likesCount: comment.likesCount || 0,
     replies: Array.isArray(comment.replies) ? comment.replies.map(mapBackendComment) : [],
+    authorId: comment.authorId,
   };
 }
 
@@ -149,6 +167,30 @@ export function PostPage() {
     loadPost();
     loadComments();
   }, [articleId]);
+
+  const handleDeleteComment = async (commentId: number) => {
+    if (!window.confirm('Are you sure you want to delete this comment?')) return;
+
+    try {
+      await deleteComment(commentId);
+      await loadComments();
+      setActionMessage('Comment deleted');
+      setTimeout(() => setActionMessage(''), 3000);
+    } catch (err) {
+      setError((err as Error).message || 'Unable to delete comment.');
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!window.confirm('Are you sure you want to delete this story? This action cannot be undone.')) return;
+
+    try {
+      await deletePost(Number(articleId));
+      navigate('/');
+    } catch (err) {
+      setError((err as Error).message || 'Unable to delete story.');
+    }
+  };
 
   const post = useMemo(() => {
     if (isLoadingPost) {
@@ -396,6 +438,15 @@ export function PostPage() {
               >
                 {isPostSaved && user ? 'Saved' : 'Save'}
               </button>
+              {user && postData && user.id === postData.authorId && (
+                <button
+                  type="button"
+                  onClick={handleDeletePost}
+                  className="rounded-md border border-red-100 bg-red-50 px-3.5 py-2 text-xs font-medium text-red-600 transition hover:border-red-200 hover:bg-red-100 md:text-sm"
+                >
+                  Delete Story
+                </button>
+              )}
             </div>
           </div>
 
@@ -466,7 +517,7 @@ export function PostPage() {
             <div className="space-y-6 border-t border-gray-100 pt-6">
               {comments.length > 0 ? (
                 comments.map((c) => (
-                  <CommentItem key={c.id} comment={c} onReply={handleReply} />
+                  <CommentItem key={c.id} comment={c} onReply={handleReply} onDelete={handleDeleteComment} />
                 ))
               ) : (
                 <p className="py-10 text-center text-sm text-gray-500">No comments yet. Be the first to share your thoughts!</p>
