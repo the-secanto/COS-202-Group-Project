@@ -62,12 +62,16 @@ It features a backend build with Node.js and Express, and a frontend developed u
 4. Database
 
 ## 📸 Screenshots of User Interface
-### 📊 Dashboard
-![Homepage](./UI_Screenshots/profile.png)
+### 🏠Home Page
+![Homepage]("C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\Homepage.png")
 
-### 🏠 Homepage
-![Login](./UI_Screenshots/body.png)
+###  🔐 Login Page
+![Login]("C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\LoginPage.png")
 
-### 🔐 Login Page
-![Login](./UI_Screenshots/login.png)
+![Sign Up]("C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\SignUp_Page.png")
+
+### 📊 Post Page
+![Posts]("C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\Post.png")
+
+ 
 
