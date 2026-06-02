@@ -21,8 +21,8 @@ app.use(cors({
   credentials: true,
 }));
 app.use(cookieParser());
-app.use(express.json());
-app.use(urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -36,6 +36,15 @@ app.use('/auth', lostPassRoutes);
 app.use('/comments', commentsRoutes);
 app.use('/users', followRoutes);
 app.use('/profile', profileRoute);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err : {},
+  });
+});
 
 const PORT = 5001;
 const server = app.listen(PORT, () => {

@@ -5,9 +5,12 @@ const getToken = () => localStorage.getItem('authToken');
 const buildHeaders = (customHeaders: HeadersInit = {}): Record<string, string> => {
   const token = getToken();
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(customHeaders as Record<string, string>),
   };
+
+  if (!headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -18,7 +21,15 @@ const buildHeaders = (customHeaders: HeadersInit = {}): Record<string, string> =
 
 const handleResponse = async (response: Response) => {
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
+  console.log('Response:', response.status, text);
+  
+  let data;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch (err) {
+    console.error('Failed to parse JSON:', err);
+    data = null;
+  }
 
   if (!response.ok) {
     const message = data?.message || data?.error || response.statusText;
@@ -31,6 +42,7 @@ const handleResponse = async (response: Response) => {
 const request = async (path: string, options: RequestInit = {}) => {
   const response = await fetch(`${BASE_URL}${path}`, {
     credentials: 'include',
+    cache: 'no-store', // Prevent caching
     ...options,
     headers: buildHeaders(options.headers ?? {}),
   });

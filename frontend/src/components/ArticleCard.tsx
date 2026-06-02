@@ -36,11 +36,13 @@ export function ArticleCard({ article }: ArticleCardProps) {
       
       <article className="flex h-full flex-col">
         <div className="relative h-40 w-full overflow-hidden">
-          <img
-            src={article.image}
-            alt={article.title}
-            className="h-full w-full object-cover"
-          />
+          <Link to={`/post/${article.id}`}>
+            <img
+                src={article.image}
+                alt={article.title}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </Link>
           <button
             onClick={(e) => {
               e.preventDefault();

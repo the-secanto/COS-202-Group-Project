@@ -4,19 +4,20 @@ import jwt from 'jsonwebtoken'
 export const updateProfile = async (req, res) => {
     const userId = req.user.id;
     const { bio, location, website, avatar } = req.body;
+    console.log('UpdateProfile Request Body:', req.body); // Debug log
 
     try {
         const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: {
+                bio,
                 location,
-                avatar // This will be the Base64 string
+                website,
+                avatar, // This will be the Base64 string
+                profileCompleted: true
             }
         });
-
-        // Note: Currently bio and website aren't in the schema, 
-        // I should probably add them or handle them differently.
-        // For now let's just update what we can.
+        console.log('Updated User:', updatedUser); // Debug log
 
         return res.status(200).json(updatedUser);
     } catch (error) {
@@ -41,6 +42,10 @@ export const getProfile = async (req, res) => {
                 id: true,
                 name: true,
                 avatar: true,
+                bio: true,
+                location: true,
+                website: true,
+                createdAt: true,
                 _count: {
                     select: {
                         posts: true,
@@ -87,6 +92,11 @@ export const getProfile = async (req, res) => {
             id: user.id,
             name: user.name,
             avatar: user.avatar,
+            bio: user.bio,
+            location: user.location,
+            website: user.website,
+            createdAt: user.createdAt,
+            profileCompleted: user.profileCompleted,
             stories: user._count.posts,
             followers: user._count.followers,
             following: user._count.following,

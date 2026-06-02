@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar.tsx';
 import { PageLayout } from '../components/PageLayout.tsx';
 import { articles } from '../data/articles.ts';
@@ -18,8 +18,6 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 const topics = [
-// ... (rest of topics)
-
   {
     label: 'Technology',
     icon: (
@@ -127,7 +125,7 @@ function ProfileStoryRow({
         <img
           src={article.image}
           alt=""
-          className="h-28 w-full rounded-md object-cover grayscale sm:h-24 sm:w-40"
+          className="h-28 w-full rounded-md object-cover transition-transform duration-500 hover:scale-105 sm:h-24 sm:w-40"
         />
       </Link>
     </article>
@@ -166,6 +164,7 @@ function ProfileFooter() {
 export function ProfilePage() {
   const { authorName } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: authUser } = useAuth();
   const currentAuthorName = authorName ? decodeURIComponent(authorName) : (authUser?.name || 'Elena Vance');
   const isOwnProfile = authUser?.name === currentAuthorName;
@@ -180,10 +179,11 @@ export function ProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: currentAuthorName,
-    bio: 'Creative Director & Design Philosopher. Exploring the intersection of digital ethics, minimalist aesthetics, and the future of human-computer interaction. Currently archiving thoughts on Lumina.',
-    location: 'San Francisco',
-    website: currentAuthorName.toLowerCase().replace(/\s+/g, '') + '.design',
+    bio: '',
+    location: '',
+    website: '',
     avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentAuthorName)}&background=8b5cf6&color=fff&size=200`,
+    joinedAt: '',
   });
   const [profileCounts, setProfileCounts] = useState({ stories: 0, followers: 0, following: 0 });
   const [authorArticles, setAuthorArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
@@ -191,6 +191,15 @@ export function ProfilePage() {
 
   const [savedArticles, setSavedArticles] = useState<{ article: BlogArticle; date: string }[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    // If we came from signup, force edit mode
+    if (isOwnProfile && location.state?.onboard) {
+      setIsEditing(true);
+      // Clear state so it doesn't re-trigger on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [isOwnProfile, location.state]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -208,7 +217,9 @@ export function ProfilePage() {
     setIsSaving(true);
     try {
       await updateProfile({
+        bio: profileData.bio,
         location: profileData.location,
+        website: profileData.website,
         avatar: profileData.avatar,
       });
       setIsEditing(false);
@@ -227,10 +238,19 @@ export function ProfilePage() {
         const profile: any = await fetchProfile(currentAuthorName);
         setProfileId(profile.id);
         setIsFollowing(profile.isFollowing);
+
+        const joinedDate = profile.createdAt 
+          ? new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+          : 'March 2022';
+
         setProfileData((prev) => ({
           ...prev,
           name: profile.name || currentAuthorName,
           avatar: profile.avatar || prev.avatar,
+          bio: profile.bio || '',
+          location: profile.location || '',
+          website: profile.website || '',
+          joinedAt: joinedDate,
         }));
         setProfileCounts({
           stories: profile.stories ?? 0,
@@ -341,8 +361,13 @@ export function ProfilePage() {
     <PageLayout mainClassName="flex flex-col text-[#1a1a1a]">
       <Navbar />
 
-      <div className="flex border-t border-gray-100">
+      {profileLoading && (
+        <div className="flex h-screen items-center justify-center bg-white/80 fixed inset-0 z-50">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-violet-600"></div>
+        </div>
+      )}
 
+      <div className="flex border-t border-gray-100">
         <aside className="hidden w-[220px] shrink-0 border-r border-gray-100 bg-[#f9f9f9] px-5 py-8 md:flex md:flex-col lg:w-[260px] lg:px-7">
           <div>
             <p className="font-semibold tracking-tight text-[#111]">Library</p>
@@ -508,7 +533,7 @@ export function ProfilePage() {
                           <rect x="3" y="4" width="18" height="18" rx="2" />
                           <path d="M16 2v4M8 2v4M3 10h18" />
                         </svg>
-                        Joined March 2022
+                        Joined {profileData.joinedAt}
                       </li>
                     </ul>
                   </>
@@ -536,8 +561,7 @@ export function ProfilePage() {
                 {(
                   [
                     { id: 'published' as const, label: 'Published' },
-                    { id: 'saved' as const, label: 'Saved' },
-                    { id: 'drafts' as const, label: 'Drafts' },
+                    ...(isOwnProfile ? [{ id: 'saved' as const, label: 'Saved' }, { id: 'drafts' as const, label: 'Drafts' }] : []),
                   ] as const
                 ).map(({ id, label }) => (
                   <button
@@ -617,4 +641,3 @@ export function ProfilePage() {
     </PageLayout>
   );
 }
-
