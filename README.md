@@ -63,7 +63,7 @@ It features a backend build with Node.js and Express, and a frontend developed u
 
 ## 📸 Screenshots of User Interface
 ### 🏠Home Page
-![Homepage]("C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\Homepage.png")
+![Homepage](C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\Homepage.png)
 
 ###  🔐 Login Page
 ![Login]("C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\LoginPage.png")
