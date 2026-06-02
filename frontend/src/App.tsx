@@ -7,6 +7,7 @@ import { LoginPage } from './pages/LoginPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { SignupPage } from './pages/SignupPage.tsx';
 import { OnboardingPage } from './pages/OnboardingPage.tsx';
+import { NotFoundPage } from './pages/NotFoundPage.tsx';
 import { ProtectedRoute } from './components/ProtectedRoute.tsx';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
       />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

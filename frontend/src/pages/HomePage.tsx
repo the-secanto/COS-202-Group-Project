@@ -33,6 +33,7 @@ export function HomePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('All Posts');
+  const [searchTerm, setSearchTerm] = useState('');
   const [visibleCount, setVisibleCount] = useState(6);
   const [articles, setArticles] = useState<BlogArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,11 +63,25 @@ export function HomePage() {
   }, []);
 
   const filteredArticles = useMemo(() => {
-    if (activeCategory === 'All Posts') {
-      return articles;
+    let filtered = articles;
+    
+    // Filter by Category
+    if (activeCategory !== 'All Posts') {
+      filtered = filtered.filter((article) => article.category === activeCategory);
     }
-    return articles.filter((article) => article.category === activeCategory);
-  }, [activeCategory, articles]);
+    
+    // Filter by Search Term
+    if (searchTerm) {
+      const lowerTerm = searchTerm.toLowerCase();
+      filtered = filtered.filter((article) => 
+        article.title.toLowerCase().includes(lowerTerm) ||
+        article.author.toLowerCase().includes(lowerTerm) ||
+        article.category.toLowerCase().includes(lowerTerm)
+      );
+    }
+    
+    return filtered;
+  }, [activeCategory, articles, searchTerm]);
 
   const visibleArticles = filteredArticles.slice(0, visibleCount);
   const canLoadMore = visibleCount < filteredArticles.length;
@@ -93,7 +108,7 @@ export function HomePage() {
   return (
     <PageLayout>
       <Navbar />
-      <HeroSection />
+      <HeroSection searchTerm={searchTerm} onSearchChange={setSearchTerm} />
       <CategoryTabs
         categories={categories}
         activeCategory={activeCategory}

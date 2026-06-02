@@ -4,8 +4,12 @@ const tags = ['#Lifestyle', '#Digitalnomad', '#AdventureCapital'];
 
 const words = ['best blogging', 'creative writing', 'modern content', 'story sharing'];
 
-export function HeroSection() {
+interface HeroSectionProps {
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
+}
 
+export function HeroSection({ searchTerm, onSearchChange }: HeroSectionProps) {
   const [currentWord, setCurrentWord] = useState(0);
 
   useEffect(() => {
@@ -42,10 +46,13 @@ export function HeroSection() {
 
         <input
           type="text"
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search for stories, authors, or topics..."
           className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
         />
       </div>
+
 
       <p className="mb-3 text-lg uppercase tracking-wide font-bold text-black">
         Trending now
