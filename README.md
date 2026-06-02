@@ -40,7 +40,7 @@ It features a backend built with Node.js and Express, and a frontend developed u
     npm install
 
 3. Run the frontend:
-    npm start
+    npm run dev
 **NOTE: Ensure the Backend is run before the Frontend**
 
 ## Usage
