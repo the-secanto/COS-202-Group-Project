@@ -94,23 +94,6 @@ function mapBackendComment(comment: any): CommentEntry {
   };
 }
 
-const defaultPost = {
-  eyebrow: 'Technology · 6 min read',
-  title: 'The Quiet Revolution of Minimal Computing',
-  author: 'Marcus Thorne',
-  authorMeta: 'Design Philosopher · Apr 16, 2026',
-  authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-  heroImage: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80',
-  heroCaption: 'The beauty of a focused environment.',
-  paragraphs: [
-    'It was on a rain-soaked afternoon I first powered this machine. No notifications, no startup banners, no digital noise. Just one cursor, one text field, and the sound of keys striking with intention.',
-    'Modern software often asks for constant attention, but this discipline asks for restraint. The less your tools demand from you, the more your work can demand from you.',
-    'Simplicity is not the absence of choice; it is the presence of enough.',
-    'The architecture of focus is built from small decisions repeated daily. Fewer tabs. Clearer files. More complete thoughts.',
-  ],
-  quoteIndex: 2,
-};
-
 function resolveArticle(articleId: string | undefined): BlogArticle | undefined {
   if (articleId === undefined || articleId === '') return undefined;
   const n = Number.parseInt(articleId, 10);
@@ -366,36 +349,36 @@ export function PostPage() {
             </div>
           )}
 
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400">{post.eyebrow}</p>
+          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400">{post?.eyebrow}</p>
 
-          <h1 className="text-2xl font-semibold leading-tight text-gray-900 md:text-[2rem]">{post.title}</h1>
+          <h1 className="text-2xl font-semibold leading-tight text-gray-900 md:text-[2rem]">{post?.title}</h1>
 
           <div className="mt-6 flex items-center gap-3">
-            <Link to={`/profile/${encodeURIComponent(post.author)}`} className="shrink-0 transition hover:opacity-80">
+            <Link to={`/profile/${encodeURIComponent(post?.author || '')}`} className="shrink-0 transition hover:opacity-80">
               <img
-                src={post.authorAvatar}
+                src={post?.authorAvatar}
                 alt=""
                 className="h-10 w-10 rounded-full object-cover"
               />
             </Link>
             <div>
-              <Link to={`/profile/${encodeURIComponent(post.author)}`} className="text-sm font-medium text-gray-800 no-underline hover:text-indigo-600 transition">
-                {post.author}
+              <Link to={`/profile/${encodeURIComponent(post?.author || '')}`} className="text-sm font-medium text-gray-800 no-underline hover:text-indigo-600 transition">
+                {post?.author}
               </Link>
-              <p className="text-xs text-gray-500">{post.authorMeta}</p>
+              <p className="text-xs text-gray-500">{post?.authorMeta}</p>
             </div>
           </div>
 
           <figure className="mt-8 border-t border-gray-100 pt-6">
             <img
-              src={post.heroImage}
-              alt={post.title}
+              src={post?.heroImage}
+              alt={post?.title}
               className="h-[300px] w-full rounded-sm object-cover md:h-[330px]"
             />
           </figure>
 
           <div className="mt-8 space-y-5 text-[14px] leading-8 text-gray-700 md:text-[15px]">
-            {post.paragraphs.map((p, i) =>
+            {post?.paragraphs.map((p, i) =>
               i === post.quoteIndex ? (
                 <p key={i} className="border-l-2 border-indigo-500 pl-4 italic text-gray-600">
                   {p}
@@ -535,23 +518,23 @@ export function PostPage() {
 
           <section className="mt-10 rounded-md border border-gray-100 bg-[#fafafa] p-4 md:p-5">
             <div className="flex items-start gap-3">
-              <Link to={`/profile/${encodeURIComponent(post.author)}`} className="shrink-0 transition hover:opacity-80">
+              <Link to={`/profile/${encodeURIComponent(post?.author || '')}`} className="shrink-0 transition hover:opacity-80">
                 <img
-                  src={post.authorAvatar}
+                  src={post?.authorAvatar}
                   alt=""
                   className="h-10 w-10 rounded-md object-cover"
                 />
               </Link>
               <div>
-                <Link to={`/profile/${encodeURIComponent(post.author)}`} className="text-sm font-semibold text-gray-900 no-underline hover:text-indigo-600 transition">
-                  {post.author}
+                <Link to={`/profile/${encodeURIComponent(post?.author || '')}`} className="text-sm font-semibold text-gray-900 no-underline hover:text-indigo-600 transition">
+                  {post?.author}
                 </Link>
                 <p className="mt-1 text-xs leading-5 text-gray-500">
                   Author of design-philosophy essays and practical note on digital focus. His writing explores how
                   minimal tools shape better thinking.
                 </p>
                 <Link
-                  to={`/profile/${encodeURIComponent(post.author)}`}
+                  to={`/profile/${encodeURIComponent(post?.author || '')}`}
                   className="mt-3 inline-block text-xs font-semibold text-indigo-600 no-underline transition hover:text-indigo-500"
                 >
                   View all publications

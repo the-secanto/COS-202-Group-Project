@@ -12,7 +12,7 @@ export function LoginPage() {
   const location = useLocation();
   const { login } = useAuth();
   
-  const state = location.state as { message?: string } | undefined;
+  const state = location.state as { message?: string; from?: { pathname: string } } | undefined;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
