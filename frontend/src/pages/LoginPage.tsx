@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthLayout } from '../AuthLayout';
 import { loginUser } from '../utils/api.ts';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,10 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  
+  const state = location.state as { message?: string } | undefined;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -29,7 +32,7 @@ export function LoginPage() {
       const data = await loginUser({ email, password });
       if (data?.token && data?.user) {
         login(data.token, data.user);
-        navigate('/');
+        navigate(state?.from?.pathname || '/');
       } else {
         throw new Error('Invalid response from server');
       }
@@ -41,6 +44,11 @@ export function LoginPage() {
   return (
     <AuthLayout>
       <h1 className="text-2xl font-semibold text-gray-900">Welcome Back</h1>
+      {state?.message && (
+        <div className="mt-4 rounded-md bg-indigo-50 p-3 text-sm text-indigo-700 border border-indigo-200">
+            {state.message}
+        </div>
+      )}
       <p className="mt-2 text-sm text-gray-500">
         Enter your credentials to access Musk.
       </p>

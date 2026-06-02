@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HeroSection } from '../components/HeroSection.tsx';
 import { CategoryTabs } from '../components/CategoryTabs.tsx';
 import { ArticlesSection } from '../components/ArticlesSection.tsx';
@@ -8,6 +9,7 @@ import { PageLayout } from '../components/PageLayout.tsx';
 import { categories } from '../data/articles.ts';
 import type { BlogArticle } from '../data/articles.ts';
 import { fetchFeed } from '../utils/api.ts';
+import { useAuth } from '../context/AuthContext';
 
 const defaultImage = 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80';
 
@@ -28,11 +30,20 @@ function mapBackendPostToArticle(post: any): BlogArticle {
 }
 
 export function HomePage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('All Posts');
   const [visibleCount, setVisibleCount] = useState(6);
   const [articles, setArticles] = useState<BlogArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Force onboarding if logged in but profile is not complete
+  useEffect(() => {
+    if (user && !user.profileCompleted) {
+      navigate('/onboarding', { replace: true });
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const loadFeed = async () => {

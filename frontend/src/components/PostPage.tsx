@@ -197,53 +197,49 @@ export function PostPage() {
     }
   };
 
+  if (isLoadingPost) {
+    return (
+        <PageLayout>
+            <Navbar />
+            <div className="flex h-96 items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600"></div>
+            </div>
+            <Footer />
+        </PageLayout>
+    );
+  }
+
   const post = useMemo(() => {
-    if (isLoadingPost) {
-        return defaultPost;
-    }
     if (postData) {
-      const excerpt = postData.content ? String(postData.content).slice(0, 120) : '';
       return {
         eyebrow: `${(postData.tags?.[0] as string) || 'Technology'} · ${postData.content ? `${Math.max(1, Math.ceil(String(postData.content).length / 250))} min read` : '1 min read'}`,
         title: postData.title || 'Untitled post',
         author: postData.author?.name || 'Anonymous',
-        authorMeta: `${(postData.tags?.[0] as string) || 'Technology'} · ${postData.createdAt ? new Date(postData.createdAt).toLocaleDateString() : 'No date'}`,
-        authorAvatar: postData.author?.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+        authorMeta: `${postData.createdAt ? new Date(postData.createdAt).toLocaleDateString() : 'No date'}`,
+        authorAvatar: postData.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(postData.author?.name || 'A')}&background=e0e7ff&color=3730a3&size=128`,
         heroImage: postData.coverPhoto || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80',
-        heroCaption: excerpt,
         paragraphs: postData.content
-          ? [
-              String(postData.content),
-              'Modern software often asks for constant attention, but thoughtful design asks for restraint. The less your tools demand from you, the more your work can demand from you.',
-              'Simplicity is not the absence of choice; it is the presence of enough.',
-              'The architecture of focus is built from small decisions repeated daily. Fewer tabs. Clearer files. More complete thoughts.',
-            ]
-          : defaultPost.paragraphs,
-        quoteIndex: 2,
+          ? String(postData.content).split('\n').filter(p => p.trim() !== '')
+          : [],
+        quoteIndex: -1, // No quote by default
       };
     }
 
-    if (!article) {
-      return defaultPost;
+    if (article) {
+        return {
+          eyebrow: `${article.category} · ${article.readTime}`,
+          title: article.title,
+          author: article.author,
+          authorMeta: `Apr 16, 2026`,
+          authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+          heroImage: article.image,
+          paragraphs: article.excerpt.split('\n').filter(p => p.trim() !== ''),
+          quoteIndex: -1,
+        };
     }
-
-    return {
-      eyebrow: `${article.category} · ${article.readTime}`,
-      title: article.title,
-      author: article.author,
-      authorMeta: `${article.category} · Apr 16, 2026`,
-      authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-      heroImage: article.image,
-      heroCaption: article.excerpt.slice(0, 120) + (article.excerpt.length > 120 ? '…' : ''),
-      paragraphs: [
-        article.excerpt,
-        'Modern software often asks for constant attention, but thoughtful design asks for restraint. The less your tools demand from you, the more your work can demand from you.',
-        'Simplicity is not the absence of choice; it is the presence of enough.',
-        'The architecture of focus is built from small decisions repeated daily. Fewer tabs. Clearer files. More complete thoughts.',
-      ],
-      quoteIndex: 2,
-    };
-  }, [article, postData, isLoadingPost]);
+    
+    return null;
+  }, [article, postData]);
 
   const showLoginPrompt = (action: string) => {
     setActionMessage(`Please login/signup to ${action} this story.`);
@@ -271,8 +267,12 @@ export function PostPage() {
       setCommentBody('');
       setReplyingTo(null);
       setShowCommentForm(false);
+      setActionMessage('Comment posted successfully!');
+      setTimeout(() => setActionMessage(''), 3000);
     } catch (err) {
       console.error('Unable to post comment:', err);
+      setActionMessage('Failed to post comment.');
+      setTimeout(() => setActionMessage(''), 3000);
     } finally {
       setIsPublishingComment(false);
     }
@@ -307,29 +307,28 @@ export function PostPage() {
     try {
       if (isLiked) {
         const result = await unlikePost(Number(articleId));
-        setLikesCount(result.likes);
+        setLikesCount(result?.likes ?? likesCount - 1);
         setIsLiked(false);
+        setActionMessage('Post unliked');
       } else {
         const result = await likePost(Number(articleId));
-        setLikesCount(result.likes);
+        setLikesCount(result?.likes ?? likesCount + 1);
         setIsLiked(true);
+        setActionMessage('Post liked!');
       }
+      setTimeout(() => setActionMessage(''), 2000);
     } catch (err) {
       console.error('Error toggling like:', err);
     }
   };
 
   const handleShare = () => {
-    if (!user) {
-      showLoginPrompt('share');
-    } else {
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        setActionMessage('Link copied to clipboard!');
-        setTimeout(() => setActionMessage(''), 3000);
-      }).catch(err => {
-        console.error('Failed to copy: ', err);
-      });
-    }
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setActionMessage('Link copied to clipboard!');
+      setTimeout(() => setActionMessage(''), 3000);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
   };
 
   const handleSave = async () => {
@@ -390,10 +389,9 @@ export function PostPage() {
           <figure className="mt-8 border-t border-gray-100 pt-6">
             <img
               src={post.heroImage}
-              alt=""
+              alt={post.title}
               className="h-[300px] w-full rounded-sm object-cover md:h-[330px]"
             />
-            <figcaption className="mt-2 text-center text-xs text-gray-400">{post.heroCaption}</figcaption>
           </figure>
 
           <div className="mt-8 space-y-5 text-[14px] leading-8 text-gray-700 md:text-[15px]">

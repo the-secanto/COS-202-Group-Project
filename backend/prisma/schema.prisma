@@ -18,7 +18,10 @@ model User {
   name             String?
   password         String
   posts            Post[]
+  bio              String?
   location         String?
+  website          String?
+  profileCompleted Boolean       @default(false)
   createdAt        DateTime      @default(now())
   comments         Comment[]
   avatar           String? // URL e.g. "https://cdn.example.com/avatar.jpg"

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar.tsx';
 import { Footer } from '../components/Footer.tsx';
 import { PageLayout } from '../components/PageLayout.tsx';
@@ -14,6 +15,7 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 export function CreatePage() {
+  const navigate = useNavigate();
   const [visibility, setVisibility] = useState<'Draft' | 'Publish'>('Draft');
   const [selectedCategory, setSelectedCategory] = useState<string>('Lifestyle');
   const [title, setTitle] = useState('');
@@ -42,19 +44,38 @@ export function CreatePage() {
       return;
     }
 
+    if (visibility === 'Publish') {
+        if (!selectedCategory) {
+            setStatus('Please select a category (tag) before publishing.');
+            return;
+        }
+        if (!coverPhoto) {
+            setStatus('Please upload a cover image before publishing.');
+            return;
+        }
+    }
+
     setIsSubmitting(true);
     try {
-      await createPost({
+      const newPost = await createPost({
         title: title.trim(),
         content: body.trim(),
         published: visibility === 'Publish',
         tags: selectedCategory ? [selectedCategory] : ['Lifestyle'],
         coverPhoto: coverPhoto,
       });
-      setStatus('Your post was created successfully.');
-      setTitle('');
-      setBody('');
-      setCoverPhoto('');
+      
+      if (visibility === 'Publish' && newPost?.id) {
+          setStatus('Your post was created successfully. Redirecting...');
+          setTimeout(() => {
+              navigate(`/post/${newPost.id}`);
+          }, 1500);
+      } else {
+          setStatus('Your post was saved as a draft.');
+          setTitle('');
+          setBody('');
+          setCoverPhoto('');
+      }
     } catch (error) {
       setStatus((error as Error).message || 'Unable to create post.');
     } finally {
@@ -222,9 +243,19 @@ export function CreatePage() {
             type="button"
             onClick={handlePublish}
             disabled={isSubmitting}
-            className="mt-10 w-full rounded-md border border-indigo-600 bg-indigo-600 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
+            className="mt-10 w-full rounded-md border border-indigo-600 bg-indigo-600 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {visibility === 'Publish' ? 'Publish Post' : 'Save as Draft'}
+            {isSubmitting ? (
+              <>
+                <svg className="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                {visibility === 'Publish' ? 'Publishing...' : 'Saving...'}
+              </>
+            ) : (
+              visibility === 'Publish' ? 'Publish Post' : 'Save as Draft'
+            )}
           </button>
 
           {status && <p className="mt-4 text-sm text-gray-700">{status}</p>}
