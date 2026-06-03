@@ -379,7 +379,7 @@ export function PostPage() {
               <Link to={`/profile/${encodeURIComponent(post?.author || '')}`} className="text-sm font-medium text-gray-800 no-underline hover:text-indigo-600 transition">
                 {post?.author}
               </Link>
-              <p className="text-xs text-gray-500">{console.log('Rendering authorMeta:', post?.authorMeta)}{post?.authorMeta}</p>
+              <p className="text-xs text-gray-500">{post?.authorMeta}</p>
             </div>
           </div>
 
@@ -392,8 +392,7 @@ export function PostPage() {
           </figure>
 
           <div className="mt-8 space-y-5 text-[14px] leading-8 text-gray-700 md:text-[15px]">
-            {post?.paragraphs?.map((p, i) => {
-              console.log('Rendering paragraph:', p);
+            {Array.isArray(post?.paragraphs) && post.paragraphs.map((p, i) => {
               return i === post.quoteIndex ? (
                 <p key={i} className="border-l-2 border-indigo-500 pl-4 italic text-gray-600">
                   {p}
