@@ -1,95 +1,71 @@
-# **COS-202-Group-Project**
+# **Musk Blog Platform**
 
- 
-# The Musk
-## Group 4 Blog Platform
+A full-stack blog platform designed for minimal computing and focused content sharing.
 
-## 📌Description
+## 📌 Description
 
-This is a full stack blog platform where users can create, read, update and delete posts. The platform also allows users to explore trending topics and discover insightful ideas.
+Musk is a blog platform where users can create, read, update, and delete posts. The platform emphasizes a distraction-free experience with authenticated user features, interactive posts (likes/comments), and a guided onboarding experience for new users.
 
-It features a backend built with Node.js and Express, and a frontend developed using React and TypeScript, providing a responsive and interactive user experience.
+It features a robust backend built with Node.js, Express, and Prisma, and a frontend developed using React and TypeScript.
 
-## 🤝Features
-- Create, read, update and delete operations for posts.
-- User authentication (Login and Sign up).
-- Users can interact with posts via comments and likes.
-- Explore trending topics and discover new content.
+## 🤝 Key Features
+- **Secure Authentication:** Sign up, log in, and protected routes.
+- **Mandatory Onboarding:** New users are guided to complete their profile (Bio, Location) immediately upon signing up.
+- **Post Management:** Create posts with mandatory tags and cover images; edit/delete your own posts.
+- **Interactive Content:** Like, save, and comment on posts with threaded replies.
+- **Smart Search:** Quickly find stories, authors, or topics directly from the homepage.
+- **Responsive Design:** Consistent UI across devices, including a dedicated 404 error page.
 
-## 🗄️Tech Stack
-- Backend: Node.js, Express, TypeScript
-- Frontend: React, TypeScript, Axios
-- Database: PostgreSQL 
+## 🗄️ Tech Stack
+- **Backend:** Node.js, Express, TypeScript, Prisma (PostgreSQL)
+- **Frontend:** React, TypeScript, TailwindCSS, Vite
+- **Deployment:** Render (Static Site for Frontend, Web Service for Backend)
 
-## 🛠️Setup
+## 🛠️ Setup
+
 ### Backend
 1. Navigate to the `backend` folder:
+   ```bash
    cd backend
-
+   ```
 2. Install dependencies:
-    npm install
-
-3. Run the backend:
-    npm run dev
+   ```bash
+   npm install
+   ```
+3. Setup `.env` (ensure `DATABASE_URL` is set).
+4. Generate Prisma client:
+   ```bash
+   npx prisma generate
+   ```
+5. Run the backend:
+   ```bash
+   npm run dev
+   ```
 
 ### Frontend
 1. Navigate to the `frontend` folder:
-    cd frontend
-
+   ```bash
+   cd frontend
+   ```
 2. Install dependencies:
-    npm install
-
+   ```bash
+   npm install
+   ```
 3. Run the frontend:
-    npm start
-**NOTE: Ensure the Backend is run before the Frontend**
-
-## Usage
-1. Open the website in your browser at ...tbd.
-2. For new users, click on Sign Up.
-3. If user already has an account, Login using your credentials.
-4. Once done in the login page, user will be redirected to the display page.
-   Here users can:
-   1. Explore trending posts
-   2. Like and comment on the posts.
-   3. Search for posts of their choice.
-5. Users can also go to the home page.
-   Here users can:
-   1. Create a new blog post.
-   2. Edit or delete their own posts.
-   3. Change personal details.
-
-## Project Structure
-1. Backend
-2. Frontend
-3. README file
-4. Database
+   ```bash
+   npm run dev
+   ```
 
 ## 📸 Screenshots of User Interface
-### 🏠Home Page
-![Homepage](UI_Screenshots\Homepage.png)
 
-###  🔐 Login Page
-![Login]("UI_Screenshots\LoginPage.png")
+### 🏠 Home Page
+![Homepage](./UI_Screenshots/Homepage.png)
 
-![Sign Up]("UI_Screenshots\SignUp_Page.png")
+### 🔐 Login Page
+![Login](./UI_Screenshots/LoginPage.png)
+
+### ✍️ Sign Up Page
+![Sign Up](./UI_Screenshots/SignUp_Page.png)
 
 ### 📊 Post Page
-![Posts]("UI_Screenshots\Post.png")
-
- 
-
-## 🌐 Live Demo
-Link: Coming soon...
-
-## 📋 Prerequisites
-Ensure you have the following installed on your machine:
-- Node.js (v18 or later)
-- npm or yarn
-- PostgreSQL
-- Git
-
-## 🚧 Future Improvements
-- Implement dark mode
-- Add emailing system
-- Add notifications system
-
+![Posts](./UI_Screenshots/Post.png)
