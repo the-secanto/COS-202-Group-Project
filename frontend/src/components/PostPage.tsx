@@ -82,11 +82,12 @@ function CommentItem({
 
 function mapBackendComment(comment: any): CommentEntry {
   const authorName = comment.author?.name || comment.author || 'Reader';
+  console.log('DEBUG: Mapping comment:', comment);
   return {
     id: comment.id,
     author: authorName,
     avatar: comment.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=e0e7ff&color=3730a3&size=128`,
-    body: comment.content || comment.body || '',
+    body: String(comment.content || comment.body || ''), // Force string
     timeLabel: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Just now',
     likesCount: comment.likesCount || 0,
     replies: Array.isArray(comment.replies) ? comment.replies.map(mapBackendComment) : [],
@@ -180,21 +181,9 @@ export function PostPage() {
     }
   };
 
-  if (isLoadingPost) {
-    return (
-        <PageLayout>
-            <Navbar />
-            <div className="flex h-96 items-center justify-center">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600"></div>
-            </div>
-            <Footer />
-        </PageLayout>
-    );
-  }
-
   const post = useMemo(() => {
     if (postData) {
-      return {
+      const p = {
         eyebrow: `${(postData.tags?.[0] as string) || 'Technology'} · ${postData.content ? `${Math.max(1, Math.ceil(String(postData.content).length / 250))} min read` : '1 min read'}`,
         title: postData.title || 'Untitled post',
         author: postData.author?.name || 'Anonymous',
@@ -206,6 +195,7 @@ export function PostPage() {
           : [],
         quoteIndex: -1, // No quote by default
       };
+      return p;
     }
 
     if (article) {
@@ -223,6 +213,30 @@ export function PostPage() {
     
     return null;
   }, [article, postData]);
+
+  if (isLoadingPost) {
+    return (
+        <PageLayout>
+            <Navbar />
+            <div className="flex h-96 items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600"></div>
+            </div>
+            <Footer />
+        </PageLayout>
+    );
+  }
+
+  if (!post) {
+      return (
+        <PageLayout>
+            <Navbar />
+            <div className="flex h-96 items-center justify-center">
+                <p className="text-gray-500">Post not found.</p>
+            </div>
+            <Footer />
+        </PageLayout>
+      );
+  }
 
   const showLoginPrompt = (action: string) => {
     setActionMessage(`Please login/signup to ${action} this story.`);
@@ -351,7 +365,7 @@ export function PostPage() {
 
           <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400">{post?.eyebrow}</p>
 
-          <h1 className="text-2xl font-semibold leading-tight text-gray-900 md:text-[2rem]">{post?.title}</h1>
+          <h1 className="text-2xl font-semibold leading-tight text-gray-900 md:text-[2rem]">{console.log('Rendering title:', post?.title)}{post?.title}</h1>
 
           <div className="mt-6 flex items-center gap-3">
             <Link to={`/profile/${encodeURIComponent(post?.author || '')}`} className="shrink-0 transition hover:opacity-80">
@@ -365,7 +379,7 @@ export function PostPage() {
               <Link to={`/profile/${encodeURIComponent(post?.author || '')}`} className="text-sm font-medium text-gray-800 no-underline hover:text-indigo-600 transition">
                 {post?.author}
               </Link>
-              <p className="text-xs text-gray-500">{post?.authorMeta}</p>
+              <p className="text-xs text-gray-500">{console.log('Rendering authorMeta:', post?.authorMeta)}{post?.authorMeta}</p>
             </div>
           </div>
 
@@ -378,15 +392,16 @@ export function PostPage() {
           </figure>
 
           <div className="mt-8 space-y-5 text-[14px] leading-8 text-gray-700 md:text-[15px]">
-            {post?.paragraphs?.map((p, i) =>
-              i === post.quoteIndex ? (
+            {post?.paragraphs?.map((p, i) => {
+              console.log('Rendering paragraph:', p);
+              return i === post.quoteIndex ? (
                 <p key={i} className="border-l-2 border-indigo-500 pl-4 italic text-gray-600">
                   {p}
                 </p>
               ) : (
                 <p key={i}>{p}</p>
-              ),
-            )}
+              );
+            })}
           </div>
 
           <div className="mt-10 border-y border-gray-100 py-4">
