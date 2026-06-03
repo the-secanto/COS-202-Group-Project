@@ -12,12 +12,6 @@ import profileRoute from './routes/profileRoute.js';
 import followRoutes from './routes/followRoutes.js';
 import lostPassRoutes from './routes/lostPass.js';
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 
 connectDB();
@@ -42,24 +36,6 @@ app.use('/auth', lostPassRoutes);
 app.use('/comments', commentsRoutes);
 app.use('/users', followRoutes);
 app.use('/profile', profileRoute);
-
-// Serve static files from the React frontend build
-app.use(express.static(path.join(__dirname, '../../frontend/dist')));
-
-// Wildcard route to handle client-side routing using regex
-app.get(/.*/, (req, res, next) => {
-  // Don't catch API routes (those starting with /auth, /posts, /comments, /users, /profile)
-  if (
-    req.path.startsWith('/auth') || 
-    req.path.startsWith('/posts') || 
-    req.path.startsWith('/comments') || 
-    req.path.startsWith('/users') || 
-    req.path.startsWith('/profile')
-  ) {
-    return next();
-  }
-  res.sendFile(path.join(__dirname, '../../frontend/dist', 'index.html'));
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

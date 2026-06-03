@@ -103,6 +103,7 @@ async function main() {
         email,
         name,
         password,
+        profileCompleted: true,
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
       },
     });
@@ -116,6 +117,7 @@ async function main() {
       email: 'test@example.com',
       name: 'Elena Vance',
       password,
+      profileCompleted: true,
       avatar: 'https://ui-avatars.com/api/?name=Elena+Vance&background=8b5cf6&color=fff',
     },
   });
