@@ -33,9 +33,9 @@ export function Footer() {
 
         <div className="grid grid-cols-2 gap-8 text-xs">
           <div className="space-y-2">
-            <p className="font-medium uppercase tracking-wide text-gray-700">Company</p>
-            <p>About</p>
-            <p>Careers</p>
+            <p className="font-medium uppercase tracking-wide text-gray-700">Pages</p>
+            <p>Write</p>
+            <p>Profile</p>
           </div>
           <div className="space-y-2">
             <p className="font-medium uppercase tracking-wide text-gray-700">Support</p>

@@ -378,7 +378,7 @@ export function PostPage() {
           </figure>
 
           <div className="mt-8 space-y-5 text-[14px] leading-8 text-gray-700 md:text-[15px]">
-            {post?.paragraphs.map((p, i) =>
+            {post?.paragraphs?.map((p, i) =>
               i === post.quoteIndex ? (
                 <p key={i} className="border-l-2 border-indigo-500 pl-4 italic text-gray-600">
                   {p}
