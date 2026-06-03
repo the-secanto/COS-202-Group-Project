@@ -66,15 +66,15 @@ It features a backend built with Node.js and Express, and a frontend developed u
 
 ## 📸 Screenshots of User Interface
 ### 🏠Home Page
-![Homepage](C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\Homepage.png)
+![Homepage](UI_Screenshots\Homepage.png)
 
 ###  🔐 Login Page
-![Login]("C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\LoginPage.png")
+![Login]("UI_Screenshots\LoginPage.png")
 
-![Sign Up]("C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\SignUp_Page.png")
+![Sign Up]("UI_Screenshots\SignUp_Page.png")
 
 ### 📊 Post Page
-![Posts]("C:\Users\marya\OneDrive\Desktop\COS-202-Group-Project\UI_Screenshots\Post.png")
+![Posts]("UI_Screenshots\Post.png")
 
  
 
@@ -89,10 +89,7 @@ Ensure you have the following installed on your machine:
 - Git
 
 ## 🚧 Future Improvements
-- Add image upload support for blog posts
 - Implement dark mode
-- Add user profile customization
-- Add bookmark/save feature
-- Deploy application online
+- Add emailing system
 - Add notifications system
 
